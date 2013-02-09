@@ -10,8 +10,10 @@ from pandac.PandaModules import TextureStage
 class SimpleSprite(NodePath):
 	def __init__(self, texture, pos, rect, parent = pixel2d):
 		self.cm = CardMaker('spritesMaker')
+		#read note on animated sprite
+		#|Craig| suggested this was the correct signs
 		self.cm.setFrame(-0.5, 0.5, -0.5, 0.5)
-		#self.cm.setHasUvs(True)
+		self.cm.setHasUvs(True)
 		NodePath.__init__(self, self.cm.generate())
 
 		self.setTexture(texture, 1)
@@ -20,9 +22,9 @@ class SimpleSprite(NodePath):
 		ts = TextureStage.getDefault()
 		tx, ty = texture.getXSize(), texture.getYSize()
 		self.setTexScale(ts, rect[2]/tx, rect[3]/ty)
-
+		#read animated sprite on notes
 		ofx = rect[0]/tx
-		ofy = rect[1]/ty
+		ofy = (rect[1]+rect[3])/ty
 		self.setTexOffset(ts, ofx, -ofy)
 		self.reparentTo(parent)
 		self.setTransparency(True)
@@ -108,8 +110,15 @@ class AnimatedSprite(NodePath):
 	def __init__(self, atlas, parent):
 		self.atlas = atlas
 		self.cm = CardMaker('spritesMaker')
+
 		self.cm.setFrame(-0.5, 0.5, -0.5, 0.5)
+		#CAREFUL
 		#self.cm.setHasUvs(True)
+		#if we set HasUvs then as the coords are -Z,
+		# the last point have to be -0.5 or it will be mirrored (-0.5, 0.5, 0.5, -0.5)
+		#i have no idea which is the best way but i assume 1 less uv is faster.
+		#also requires less modification
+
 		NodePath.__init__(self, self.cm.generate())
 
 		self.setTexture(atlas.texture, 1)
@@ -150,6 +159,13 @@ class AnimatedSprite(NodePath):
 		self.setTexScale(self.ts, rect[2]/self.tx, rect[3]/self.ty)
 
 		ofx = rect[0]/self.tx
-		ofy = rect[1]/self.ty
-		self.setTexOffset(self.ts, -ofx, -ofy)
+		#Vs are negative so i must add the sprite size
+		ofy = (rect[1]+rect[3])/self.ty
+		#vs are negative so i must substract it
+		self.setTexOffset(self.ts, ofx, -ofy)
+		#i really really would love to not have to do all this kind of stuff.
+		#having one point of reference (top-left==0,0) makes all this more natural and intuitive (which is not)
+		#right now the node origin is bottomleft, the texture origin is bottomleft but the coords are -Y
+		#the screen origin is bottom-left but also +Y
+
 
