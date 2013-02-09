@@ -48,12 +48,12 @@ class Mundo(panda2d.World):
 
 		self.atlas = panda2d.sprites.Atlas("data", "spritesheet")
 
-		#self.ghost = catsu.models.Ghost(self.atlas, self.node)
-		self.ghost = panda2d.sprites.AnimatedSprite(self.atlas, self.node)
-		f = self.atlas.anims[self.atlas.animIndex("cat_walking")].frames[0]
-		print f
-		self.ghost.setFrame(f)
-		self.ghost.setPos(50, 1, 150)
+		self.ghost = catsu.models.Ghost(self.atlas, self.node)
+		#self.ghost = panda2d.sprites.AnimatedSprite(self.atlas, self.node)
+		#f = self.atlas.anims[self.atlas.animIndex("cat_walking")].frames[0]
+		#print f
+		#self.ghost.setFrame(f)
+		#self.ghost.setPos(50, 1, 150)
 		#self.gato = catsu.models.Cat(self.atlas, self.node)
 		#self.blast = catsu.models.Blast(self.atlas, self.node)
 		#self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.node)
