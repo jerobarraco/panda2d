@@ -26,12 +26,14 @@ class Layer:
 		self.tiles_id = list(grouper(d['data'], self.width, 0))
 		y = 0
 		self.tiles = []
-		for row_id in self.tiles_id:
+		# tiled orders the array so the firsts items are the one of the top, even it has +Y coords.. which makes it stupid, but visually simpler
+		# i could get the map height in tiles and start counting on that and decreasing the Y, but i rather iterate the list inversely
+		for row_id in reversed(self.tiles_id):
 			row = []
 			x = 0
 			for tile_id in row_id:
 				if tile_id:
-					pos = Vec3(x, -3, y)
+					pos = Vec3(x, 3, y)
 					ts = tilemap.tileSet(tile_id)
 					rect = ts.tileRect(tile_id)
 					sp = panda2d.sprites.SimpleSprite(ts.texture, pos, rect, tilemap.parent)
@@ -58,7 +60,6 @@ class TileSet():
 
 	def tileRect(self, idn):
 		real_id = idn - self.firstgid
-
 		j = real_id % self.width
 		i = int(real_id / self.width)
 		return self.rects[i][j]
@@ -84,7 +85,7 @@ class TileMap:
 		return ts
 
 	def tileRect(self, idn):
-		ts = tileSet(idn)
+		ts = self.tileSet(idn)
 		if ts:
 			return ts.tileRect(idn)
 		return None

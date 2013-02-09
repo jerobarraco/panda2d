@@ -9,8 +9,13 @@ class Cat(panda2d.sprites.AnimatedSprite):
 		self.HIT = self.atlas.animIndex("cat_hit")
 		self.JUMPING = self.atlas.animIndex("cat_jump")
 		self.play(self.WALKING)
-		self.setPos(30, 0, 280)
-		pass
+		self.setPos(30, 0, 60)
+		self.m = taskMgr.add(self.move, 'cat move')
+
+	def move (self, task):
+		#todo use lerp
+		self.setX(self.getX()+40*globalClock.getDt())
+		return task.cont
 
 class Ghost(panda2d.sprites.AnimatedSprite):
 	def __init__(self, atlas, node):

@@ -11,9 +11,8 @@ class SimpleSprite(NodePath):
 	def __init__(self, texture, pos, rect, parent = pixel2d):
 		self.cm = CardMaker('spritesMaker')
 		#read note on animated sprite
-		#|Craig| suggested this was the correct signs
 		self.cm.setFrame(-0.5, 0.5, -0.5, 0.5)
-		self.cm.setHasUvs(True)
+		#self.cm.setHasUvs(True)
 		NodePath.__init__(self, self.cm.generate())
 
 		self.setTexture(texture, 1)
@@ -110,6 +109,7 @@ class AnimatedSprite(NodePath):
 	def __init__(self, atlas, parent):
 		self.atlas = atlas
 		self.cm = CardMaker('spritesMaker')
+		#|Craig| suggested this was the correct signs
 
 		self.cm.setFrame(-0.5, 0.5, -0.5, 0.5)
 		#CAREFUL
@@ -118,6 +118,9 @@ class AnimatedSprite(NodePath):
 		# the last point have to be -0.5 or it will be mirrored (-0.5, 0.5, 0.5, -0.5)
 		#i have no idea which is the best way but i assume 1 less uv is faster.
 		#also requires less modification
+		#Using 0.5 for the extremes makes the texture look better, dunno why, also is easier to transform and some animations would
+		#require centering by nature, so is best to use that.
+
 
 		NodePath.__init__(self, self.cm.generate())
 
@@ -126,6 +129,22 @@ class AnimatedSprite(NodePath):
 		self.ts = TextureStage.getDefault()
 		self.reparentTo(parent)
 		self.setTransparency(True)
+
+	def setFrame(self, frame):
+		sp = self.atlas.sprites[frame.name]
+		rect = sp.rect
+		self.setScale(rect[2], 1.0, rect[3])
+		self.setTexScale(self.ts, rect[2]/self.tx, rect[3]/self.ty)
+
+		ofx = rect[0]/self.tx
+		#Vs are negative so i must add the sprite size
+		ofy = (rect[1]+rect[3])/self.ty
+		#vs are negative so i must substract it
+		self.setTexOffset(self.ts, ofx, -ofy)
+		#i really really would love to not have to do all this kind of stuff.
+		#having one point of reference (top-left==0,0) makes all this more natural and intuitive (which is not)
+		#right now the node origin is bottomleft, the texture origin is bottomleft but the coords are -Y
+		#the screen origin is bottom-left but also +Y
 
 	def play(self, i):
 		self.anim = self.atlas.anims[i]
@@ -152,20 +171,6 @@ class AnimatedSprite(NodePath):
 				return task.done
 		return task.again
 
-	def setFrame(self, frame):
-		sp = self.atlas.sprites[frame.name]
-		rect = sp.rect
-		self.setScale(rect[2], 1.0, rect[3])
-		self.setTexScale(self.ts, rect[2]/self.tx, rect[3]/self.ty)
 
-		ofx = rect[0]/self.tx
-		#Vs are negative so i must add the sprite size
-		ofy = (rect[1]+rect[3])/self.ty
-		#vs are negative so i must substract it
-		self.setTexOffset(self.ts, ofx, -ofy)
-		#i really really would love to not have to do all this kind of stuff.
-		#having one point of reference (top-left==0,0) makes all this more natural and intuitive (which is not)
-		#right now the node origin is bottomleft, the texture origin is bottomleft but the coords are -Y
-		#the screen origin is bottom-left but also +Y
 
 
