@@ -16,7 +16,7 @@ class Cat(panda2d.sprites.AnimatedSprite):
 		#todo use lerp
 		dt = globalClock.getDt()
 		self.setX(self.getX()+40*dt)
-		base.cam2d.setX(base.cam2d.getX()+40/320.0*dt)
+		base.cam2dp.setX(base.cam2dp.getX()+40/320.0*dt)
 		return task.cont
 
 class Ghost(panda2d.sprites.AnimatedSprite):

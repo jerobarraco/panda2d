@@ -6,6 +6,8 @@ from pandac.PandaModules import NodePath
 from pandac.PandaModules import CardMaker
 from pandac.PandaModules import Vec4, Vec3, Vec2
 from pandac.PandaModules import TextureStage
+from panda3d.core import Texture
+
 
 class SimpleSprite(NodePath):
 	def __init__(self, texture, pos, rect, parent):
@@ -62,6 +64,8 @@ class Atlas():
 		f = open(dir+'/'+filename, "r")
 		text = f.readline().strip()
 		self.texture = loader.loadTexture(dir+'/'+text)
+		self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
+		self.texture.setMinfilter(Texture.FTLinearMipmapLinear)
 		self.sprites = {}
 		format = f.readline().strip()
 		filter = f.readline().strip()

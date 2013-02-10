@@ -5,22 +5,36 @@ from pandac.PandaModules import TextureStage
 from direct.showbase.ShowBase import ShowBase
 
 class World(ShowBase):
-	def __init__(self, width, height, parent=None):
+	def __init__(self, width, height, parent=None, cam=None):
 		ShowBase.__init__(self)
 		self.width , self.height = width, height
 		if parent is None:
-			parent  = self.pixel2d
-		self.node = self.origin = self.parent = parent
-		self.ar = parent.getScale()[0]
-		base.cam2d.setZ(2)
+			self.node = self.pixel2dp
+			self.cam = base.cam2dp
+			#self.cam.setZ(2)
+		else:
+			self.node = parent
+			self.cam = cam
+
+		self.cam_node = self.cam.node()
+
+		self.ar = self.node.getScale()[0]
 		print "AR", self.ar
+		#reparent and resize suggested by cool rdb ( http://www.panda3d.org/forums/viewtopic.php?p=91395&sid=348d8b21e0f59043c6bfbcadb210a303#91395 )
+		self.cam.reparentTo(self.node)
+		cam_lens = self.cam_node.getLens()
+		cam_lens.setFilmSize(width, height)
+		cam_lens.setFilmOffset(width/2.0, height/2.0)
+		#and works like a charm obviously :D
+
+
 		# test some points
 		#   points = [(0,0), (screenWidth, 0), (screenWidth, screenHeight), (screenWidth/2.0, screenHeight/2.0), (0, screenHeight)]
 		#   for pt in points:
 		#      print '%s -> %s' % (pt, str(parent.getRelativePoint(screenNode, Vec3(pt[0], 0, pt[1]))))
 
 		#return [self.node, self.origin]
-		return parent, parent
+
 
 def setNode(self):
 	self.origin = parent.attachNewNode('screen_origin')

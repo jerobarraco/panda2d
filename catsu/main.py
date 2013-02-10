@@ -25,6 +25,7 @@ from pandac.PandaModules import TextureStage, OccluderNode, Point3
 """ para saber si tenemos threads"""
 from pandac.PandaModules import Thread
 print "threads? ", Thread.isThreadingSupported()
+from panda3d.core import SceneGraphAnalyzerMeter
 
 import panda2d
 import panda2d.sprites
@@ -37,16 +38,21 @@ class Mundo(panda2d.World):
 		base.setBackgroundColor(100, 0, 0)        #Set the background color
 		base.setFrameRateMeter(True)
 		self.addSprite()
-		t = taskMgr.doMethodLater(0, self.move_cam, 'animation')
+		t = taskMgr.doMethodLater(3, self.move_cam, 'animation')
+
+		self.meter = SceneGraphAnalyzerMeter('meter', self.aspect2dp.node())
+		self.meter.setupWindow(base.win)
 
 	def move_cam(self, task):
-		return task.done
+		self.cam.setX(self.cam.getX()+20*globalClock.getDt())
+
+		return task.cont
 
 	def addSprite(self):
 
 		occluder = OccluderNode('my occluder')
 		occluder.setVertices( Point3(0, 0, 0), Point3(320, 0, 0), Point3(320, 0, 480), Point3(0, 0, 480))
-		occluder_nodepath = self.pixel2d.attachNewNode(occluder)
+		occluder_nodepath = self.node.attachNewNode(occluder)
 		self.pixel2d.setOccluder(occluder_nodepath)
 
 		self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.node)
@@ -62,7 +68,12 @@ class Mundo(panda2d.World):
 
 		self.gato = catsu.models.Cat(self.atlas, self.node)
 		self.blast = catsu.models.Blast(self.atlas, self.node)
-		cn = base.cam2d.node()
+		#LerpFunctionInterval(self.blast.setZ, 10, 0, 20)
+
+		#os = base.OnScreenDebug()
+		#os.add("algo", 20)
+
+		cn = base.cam2dp.node()
 		cn.setCullCenter(self.blast)
 		#base.cam2d.node().setScene(self.node)
 
