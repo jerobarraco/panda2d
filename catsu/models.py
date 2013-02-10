@@ -14,7 +14,9 @@ class Cat(panda2d.sprites.AnimatedSprite):
 
 	def move (self, task):
 		#todo use lerp
-		self.setX(self.getX()+40*globalClock.getDt())
+		dt = globalClock.getDt()
+		self.setX(self.getX()+40*dt)
+		base.cam2d.setX(base.cam2d.getX()+40/320.0*dt)
 		return task.cont
 
 class Ghost(panda2d.sprites.AnimatedSprite):

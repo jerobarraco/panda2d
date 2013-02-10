@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
-import direct.directbase.DirectStart #da el render
-from direct.showbase.DirectObject import DirectObject
+#import direct.directbase.DirectStart #da el render
+#from direct.showbase.DirectObject import DirectObject
 from pandac.PandaModules import TextureStage
+from direct.showbase.ShowBase import ShowBase
 
-class World(DirectObject):
-	def __init__(self, width, height, parent=pixel2d):
+class World(ShowBase):
+	def __init__(self, width, height, parent=None):
+		ShowBase.__init__(self)
 		self.width , self.height = width, height
+		if parent is None:
+			parent  = self.pixel2d
 		self.node = self.origin = self.parent = parent
 		self.ar = parent.getScale()[0]
 		base.cam2d.setZ(2)

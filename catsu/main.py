@@ -15,13 +15,13 @@ ConfigVariableString('preload-textures', '0')
 ConfigVariableString('preload-simple-textures', '1')
 ConfigVariableString('texture-compression', '1')
 ConfigVariableString('allow-incomplete-render', '1' )
-from direct.showbase.DirectObject import DirectObject
-import direct.directbase.DirectStart #da el render
+#from direct.showbase.DirectObject import DirectObject
+#import direct.directbase.DirectStart #da el render
 from pandac.PandaModules import CollisionTraverser
 from pandac.PandaModules import NodePath
 from pandac.PandaModules import CardMaker
 from pandac.PandaModules import Vec4, Vec3, Vec2
-from pandac.PandaModules import TextureStage
+from pandac.PandaModules import TextureStage, OccluderNode, Point3
 """ para saber si tenemos threads"""
 from pandac.PandaModules import Thread
 print "threads? ", Thread.isThreadingSupported()
@@ -37,12 +37,18 @@ class Mundo(panda2d.World):
 		base.setBackgroundColor(100, 0, 0)        #Set the background color
 		base.setFrameRateMeter(True)
 		self.addSprite()
-		t = taskMgr.doMethodLater(0, self.cam, 'animation')
+		t = taskMgr.doMethodLater(0, self.move_cam, 'animation')
 
-	def cam(self, task):
+	def move_cam(self, task):
 		return task.done
 
 	def addSprite(self):
+
+		occluder = OccluderNode('my occluder')
+		occluder.setVertices( Point3(0, 0, 0), Point3(320, 0, 0), Point3(320, 0, 480), Point3(0, 0, 480))
+		occluder_nodepath = self.pixel2d.attachNewNode(occluder)
+		self.pixel2d.setOccluder(occluder_nodepath)
+
 		self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.node)
 
 		t = loader.loadTexture("data/spritesheet.png")
@@ -56,7 +62,9 @@ class Mundo(panda2d.World):
 
 		self.gato = catsu.models.Cat(self.atlas, self.node)
 		self.blast = catsu.models.Blast(self.atlas, self.node)
-
+		cn = base.cam2d.node()
+		cn.setCullCenter(self.blast)
+		#base.cam2d.node().setScene(self.node)
 
 
 def runCatsu():

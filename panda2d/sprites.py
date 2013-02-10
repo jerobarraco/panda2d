@@ -8,7 +8,7 @@ from pandac.PandaModules import Vec4, Vec3, Vec2
 from pandac.PandaModules import TextureStage
 
 class SimpleSprite(NodePath):
-	def __init__(self, texture, pos, rect, parent = pixel2d):
+	def __init__(self, texture, pos, rect, parent):
 		self.cm = CardMaker('spritesMaker')
 		#read note on animated sprite
 		self.cm.setFrame(-0.5, 0.5, -0.5, 0.5)

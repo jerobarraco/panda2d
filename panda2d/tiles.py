@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 
-from pandac.PandaModules import Vec4, Vec3, Vec2
+from pandac.PandaModules import Vec4, Vec3, Vec2, Texture
 
 import itertools
 import panda2d.sprites
@@ -28,19 +28,39 @@ class Layer:
 		self.tiles = []
 		# tiled orders the array so the firsts items are the one of the top, even it has +Y coords.. which makes it stupid, but visually simpler
 		# i could get the map height in tiles and start counting on that and decreasing the Y, but i rather iterate the list inversely
+
+		#create a vector of columns to allow for object culling http://www.panda3d.org/forums/viewtopic.php?p=26819#26819
+		#it was easier to use rows, but rows are larger, and the movement will be more likely to be horizontal. so the culling is more efficient this way
+		#(we could create groups but i dont feel like it now)
+		#this is very inneficient, if we could iterate the columns instead of rows, maybe it will be more efficient
+		tw = tilemap.tilewidth
+		col_width = 5
+		col_real_width = tw*col_width
+		cols = []
+		for i in range(len(self.tiles_id [0])/col_width):
+			col = tilemap.parent.attachNewNode("map_column%s"%i)
+			col.setX(i*col_real_width)
+			cols.append(col)
+
 		for row_id in reversed(self.tiles_id):
-			row = []
-			x = 0
-			for tile_id in row_id:
+			#row = []
+			for i, tile_id in enumerate(row_id):
+				if i%col_width == 0:
+					x = 0
 				if tile_id:
+
 					pos = Vec3(x, 3, y)
 					ts = tilemap.tileSet(tile_id)
 					rect = ts.tileRect(tile_id)
-					sp = panda2d.sprites.SimpleSprite(ts.texture, pos, rect, tilemap.parent)
-					row.append(sp)
-				x+= tilemap.tilewidth
-			self.tiles.append(list(row))
+					sp = panda2d.sprites.SimpleSprite(ts.texture, pos, rect, cols[i/col_width])
+					#row.append(sp)
+				x+= tw
+
+			#self.tiles.append(list(row))
 			y += tilemap.tileheight
+		#this improves performance! thanks thomasEgi you're so cool! ( http://www.panda3d.org/forums/viewtopic.php?p=24102#24102 )
+		for col in cols:
+			col.flattenStrong()
 
 class TileSet():
 	def __init__(self, d, dir):
@@ -48,6 +68,8 @@ class TileSet():
 							 'tileheight', 'tilewidth', 'transparentcolor'):
 			setattr(self, at, d[at])
 		self.texture = loader.loadTexture(dir+'/'+self.image)
+		self.texture.setMinfilter(Texture.FTLinearMipmapLinear)
+
 		self.width = self.imagewidth / self.tilewidth
 		self.height = self.imageheight / self.tileheight
 		self.rects = [
