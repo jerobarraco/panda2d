@@ -26,7 +26,7 @@ from pandac.PandaModules import TextureStage, OccluderNode, Point3
 from pandac.PandaModules import Thread
 print "threads? ", Thread.isThreadingSupported()
 from panda3d.core import SceneGraphAnalyzerMeter
-
+from pandac.PandaModules import ARToolKit
 import panda2d
 import panda2d.sprites
 import panda2d.tiles
@@ -38,18 +38,16 @@ class Mundo(panda2d.World):
 		base.setBackgroundColor(100, 0, 0)        #Set the background color
 		base.setFrameRateMeter(True)
 		self.addSprite()
-		t = taskMgr.doMethodLater(3, self.move_cam, 'animation')
+		#t = taskMgr.doMethodLater(3, self.move_cam, 'animation')
 
 		self.meter = SceneGraphAnalyzerMeter('meter', self.aspect2dp.node())
 		self.meter.setupWindow(base.win)
 
 	def move_cam(self, task):
 		self.cam.setX(self.cam.getX()+20*globalClock.getDt())
-
-		return task.cont
+		return task.done
 
 	def addSprite(self):
-
 		occluder = OccluderNode('my occluder')
 		occluder.setVertices( Point3(0, 0, 0), Point3(320, 0, 0), Point3(320, 0, 480), Point3(0, 0, 480))
 		occluder_nodepath = self.node.attachNewNode(occluder)
@@ -64,19 +62,20 @@ class Mundo(panda2d.World):
 		self.atlas = panda2d.sprites.Atlas("data", "spritesheet")
 
 		self.ghost = catsu.models.Ghost(self.atlas, self.node)
-		self.ghost = panda2d.sprites.AnimatedSprite(self.atlas, self.node)
+		#self.ghost = panda2d.sprites.AnimatedSprite(self.atlas, self.node)
 
 		self.gato = catsu.models.Cat(self.atlas, self.node)
 		self.blast = catsu.models.Blast(self.atlas, self.node)
 		#LerpFunctionInterval(self.blast.setZ, 10, 0, 20)
+		ofs = NodePath("offseter")
+		ofs.reparentTo(self.gato)
+		ofs.setPos(-1.5,0,-1.5)#this is in "cat sprite" coords... too bad.
+		self.follow(ofs)
 
-		#os = base.OnScreenDebug()
+		#os = base.OnScreenDebug() #? how dows this work?
 		#os.add("algo", 20)
 
-		cn = base.cam2dp.node()
-		cn.setCullCenter(self.blast)
-		#base.cam2d.node().setScene(self.node)
-
+		self.cam_node.setCullCenter(self.blast)
 
 def runCatsu():
 	world = Mundo()

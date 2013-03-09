@@ -34,6 +34,14 @@ class World(ShowBase):
 		#      print '%s -> %s' % (pt, str(parent.getRelativePoint(screenNode, Vec3(pt[0], 0, pt[1]))))
 
 		#return [self.node, self.origin]
+	def follow(self, node):
+		#yeah importing here is bad, but i'm planning on removing this.
+		from panda3d.core import CompassEffect
+		#this works like a charm, but following a character needs more control over the offset and maybe some limits,
+		# and faking speed movement for the camera, so maybe is best to have a task for it.
+		# http://www.panda3d.org/forums/viewtopic.php?p=50905#50905
+		# http://www.panda3d.org/forums/viewtopic.php?p=10968#10968
+		self.cam.setEffect(CompassEffect.make(node, CompassEffect.PPos))
 
 
 def setNode(self):
