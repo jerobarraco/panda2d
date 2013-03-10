@@ -25,8 +25,7 @@ from pandac.PandaModules import TextureStage, OccluderNode, Point3
 """ para saber si tenemos threads"""
 from pandac.PandaModules import Thread
 print "threads? ", Thread.isThreadingSupported()
-from panda3d.core import SceneGraphAnalyzerMeter
-from pandac.PandaModules import ARToolKit
+from panda3d.core import SceneGraphAnalyzerMeter, MeshDrawer2D
 import panda2d
 import panda2d.sprites
 import panda2d.tiles
@@ -52,10 +51,9 @@ class Mundo(panda2d.World):
 		occluder.setVertices( Point3(0, 0, 0), Point3(320, 0, 0), Point3(320, 0, 480), Point3(0, 0, 480))
 		occluder_nodepath = self.node.attachNewNode(occluder)
 		self.pixel2d.setOccluder(occluder_nodepath)
-
-		self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.node)
-
 		t = loader.loadTexture("data/spritesheet.png")
+		"""self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.node)
+
 
 		self.ss = panda2d.sprites.SimpleSprite(t, (50, 1, 50), Vec4(0, 0, 32, 32), self.node)
 
@@ -76,6 +74,15 @@ class Mundo(panda2d.World):
 		#os.add("algo", 20)
 
 		self.cam_node.setCullCenter(self.blast)
+		"""
+		self.md = MeshDrawer2D()
+		self.md.setBudget(1000)
+		self.md.begin()
+		self.md.rectangle(1, 1, 4, 4, 0, 0,0, 0, (0.5,1,1,0))
+		self.md.end()
+		self.md.getRoot().reparentTo(self.node)
+		self.md.getRoot().setTexture(t)
+		#http://www.panda3d.org/manual/index.php/MeshDrawer
 
 def runCatsu():
 	world = Mundo()

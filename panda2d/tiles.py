@@ -69,7 +69,7 @@ class TileSet():
 			setattr(self, at, d[at])
 		self.texture = loader.loadTexture(dir+'/'+self.image)
 		self.texture.setMinfilter(Texture.FTLinearMipmapLinear)
-
+		self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
 		self.width = self.imagewidth / self.tilewidth
 		self.height = self.imageheight / self.tileheight
 		self.rects = [
