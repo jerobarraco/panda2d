@@ -22,6 +22,7 @@ class Layer:
 		self.cam = tilemap.cam
 		self.parent = tilemap.parent
 		self.color = Vec4(1,1,1,1)#rgba?
+		self.depth = 3
 		self.m  = MeshDrawer()
 		self.m.setBudget(100)
 		self.r = self.m.getRoot()
@@ -49,13 +50,13 @@ class Layer:
 		th = tilemap.tileheight
 		col_width = 5
 		col_real_width = tw*col_width
-		x = 0
 		self.texture = None
 		for row_id in reversed(self.tiles_id):
 			row = []
+			x = 0
 			for i, tile_id in enumerate(row_id):
 				if tile_id:
-					pos = Vec3(x, 3, y)
+					pos = Vec3(x, self.depth, y)
 					ts = tilemap.tileSet(tile_id)
 					rect = ts.tileRect(tile_id)
 					if self.texture is None:
@@ -64,8 +65,7 @@ class Layer:
 					row.append(bill)
 				x+= tw
 			self.tiles.append(list(row))
-
-			y += tilemap.tileheight
+			y += th
 
 		self.tiles = list(self.tiles)
 		self.r.setTexture(self.texture)
@@ -75,7 +75,7 @@ class Layer:
 		self.m.begin(self.cam, self.parent)
 		for row in self.tiles:
 			for bill in row:
-				self.m.billboard(*bill)#rgbA
+				self.m.billboard(*bill)
 		self.m.end()
 		return task.cont
 
@@ -94,7 +94,8 @@ class TileSet():
 		th = float (self.tileheight)
 		self.rects = list([
 			list([
-				Vec4(j/tw, i/th, 1.0/tw, 1.0/th)
+				Vec4(j+1/tw, i+1/th, 1.0/tw, 1.0/th)
+				#Vec4(j*tw, i*th, tw, th)
 				for j in range(self.width)
 			])
 			for i in range(self.height)
