@@ -22,7 +22,7 @@ class Layer:
 		self.cam = tilemap.cam
 		self.parent = tilemap.parent
 		self.color = Vec4(1,1,1,1)#rgba?
-		self.depth = 3
+		self.depth = 0
 		self.m  = MeshDrawer()
 		self.m.setBudget(1000)
 		self.r = self.m.getRoot()
@@ -41,19 +41,13 @@ class Layer:
 		self.tiles = []
 		# tiled orders the array so the firsts items are the one of the top, even it has +Y coords.. which makes it stupid, but visually simpler
 		# i could get the map height in tiles and start counting on that and decreasing the Y, but i rather iterate the list inversely
-
-		#create a vector of columns to allow for object culling http://www.panda3d.org/forums/viewtopic.php?p=26819#26819
-		#it was easier to use rows, but rows are larger, and the movement will be more likely to be horizontal. so the culling is more efficient this way
-		#(we could create groups but i dont feel like it now)
-		#this is very inneficient, if we could iterate the columns instead of rows, maybe it will be more efficient
 		tw = tilemap.tilewidth
 		th = tilemap.tileheight
-		col_width = 5
-		col_real_width = tw*col_width
+		scale = tw/2.0#i have no idea why /2......
 		self.texture = None
-		for row_id in reversed(self.tiles_id):
+		for row_id in (self.tiles_id):
 			row = []
-			x = -tw*4
+			x = -tw
 			for i, tile_id in enumerate(row_id):
 				if tile_id:
 					pos = Vec3(x, self.depth, y)
@@ -62,7 +56,7 @@ class Layer:
 					if self.texture is None:
 						self.texture = ts.texture
 					#self.m.billboard((50, 0, 50), (0, 0, 1, 1) , 10,  (1,1,1,1))#rgbA
-					bill = (pos, rect, tw, self.color)
+					bill = (pos, rect, scale, self.color)
 					row.append(bill)
 				x+= tw
 			self.tiles.append(list(row))
