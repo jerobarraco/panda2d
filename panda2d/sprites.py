@@ -91,7 +91,7 @@ class Atlas():
 					self.anims.append(anim)
 					lines = []#necessary
 		except:
-			print ("No animations for this spritesheet")
+			print ("No animations for this spritesheet (%s)" % filename)
 		pass
 
 	def createSprite(self, spriteName, parent):

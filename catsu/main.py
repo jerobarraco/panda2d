@@ -25,7 +25,7 @@ from pandac.PandaModules import TextureStage, OccluderNode, Point3
 """ para saber si tenemos threads"""
 from pandac.PandaModules import Thread
 print "threads? ", Thread.isThreadingSupported()
-from panda3d.core import SceneGraphAnalyzerMeter, MeshDrawer2D, MeshDrawer
+from panda3d.core import SceneGraphAnalyzerMeter
 import panda2d
 import panda2d.sprites
 import panda2d.tiles
@@ -54,8 +54,8 @@ class Mundo(panda2d.World):
 		#self.pixel2d.setOccluder(occluder_nodepath)
 		#t = loader.loadTexture("data/spritesheet.png")
 		self.t = loader.loadTexture("data/gato.png")
-		"""self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.node)
-
+		self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.node, self.cam)
+		"""
 
 		self.ss = panda2d.sprites.SimpleSprite(t, (50, 1, 50), Vec4(0, 0, 32, 32), self.node)
 
@@ -77,7 +77,7 @@ class Mundo(panda2d.World):
 
 		self.cam_node.setCullCenter(self.blast)
 		"""
-		self.md = MeshDrawer2D()
+		"""self.md = MeshDrawer2D()
 		self.md.setBudget(100)
 		r = self.md.getRoot()
 		r.setDepthWrite(False)
@@ -85,30 +85,8 @@ class Mundo(panda2d.World):
 		r.setTwoSided(True)
 		r.reparentTo(self.node)
 		r.setTexture(self.t)
-		r.setBin("fixed",0)
+		r.setBin("fixed",0)"""
 		#http://www.panda3d.org/manual/index.php/MeshDrawer
-		taskMgr.add(self.renderTile, "update")
-
-		self.m  = MeshDrawer()
-		self.m.setBudget(100)
-		r = self.m.getRoot()
-		r.setDepthWrite(False)
-		r.setTransparency(True)
-		r.setTwoSided(True)
-		r.reparentTo(self.node)
-		r.setTexture(self.t)
-		r.setBin("fixed",0)
-
-	def renderTile(self, task):
-		"""self.md.getRoot().setTexture(self.t)
-		self.md.begin()
-		self.md.rectangle(-20, -20, 50, 40, .5, .5, 0.5, 0.5, (0.5,1,1,1))
-		self.md.end()"""
-
-		self.m.begin(self.cam, self.node)
-		self.m.billboard((50, 0, 50), (0, 0, 1, 1) , 10,  (1,1,1,1))#rgbA
-		self.m.end()
-		return task.cont
 
 def runCatsu():
 	world = Mundo()
