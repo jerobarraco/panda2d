@@ -50,10 +50,10 @@ class Mundo(panda2d.World):
 	def addSprite(self):
 		"""occluder = OccluderNode('my occluder')
 		occluder.setVertices( Point3(0, 0, 0), Point3(320, 0, 0), Point3(320, 0, 480), Point3(0, 0, 480))
-		occluder_nodepath = self.node.attachNewNode(occluder)"""
-		#self.pixel2d.setOccluder(occluder_nodepath)
-		#t = loader.loadTexture("data/spritesheet.png")
-		self.t = loader.loadTexture("data/gato.png")
+		occluder_nodepath = self.node.attachNewNode(occluder)
+		self.pixel2d.setOccluder(occluder_nodepath)"""
+		t = loader.loadTexture("data/spritesheet.png")
+		#self.t = loader.loadTexture("data/gato.png")
 		self.tmap_node = self.node.attachNewNode("tilemap")
 		#self.tmap_node.setPos(-300, 0, -100)
 		self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.tmap_node, self.cam)
