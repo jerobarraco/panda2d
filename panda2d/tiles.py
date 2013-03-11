@@ -45,10 +45,10 @@ class Layer:
 		th = tilemap.tileheight
 		scale = tw/2.0#i have no idea why /2......
 		self.texture = None
-		for row_id in (self.tiles_id):
+		for row_id in reversed(self.tiles_id):
 			row = []
-			x = -tw
-			for i, tile_id in enumerate(row_id):
+			x = 0
+			for  tile_id in (row_id):
 				if tile_id:
 					pos = Vec3(x, self.depth, y)
 					ts = tilemap.tileSet(tile_id)
@@ -68,6 +68,7 @@ class Layer:
 
 	def draw(self, task):
 		self.m.begin(self.cam, self.parent)
+		#todo optimize this
 		for row in self.tiles:
 			for bill in row:
 				#print bill
@@ -93,12 +94,13 @@ class TileSet():
 		# Vec4(14.0/16,5.0/16,1.0/16,1.0/16.)
 		self.rects = list([
 			list([
+				#Vec4(j*w, i*h, w, h)
 				Vec4(j*w, i*h, w, h)
 				#Vec4(0,0,1,1) #Frame of Vec4(0,0,1,1) would be the entire texture
 				#Vec4(j*tw, i*th, tw, th)
 				for j in range(self.width)
 			])
-			for i in range(self.height)
+			for i in range(self.height-1, -1, -1)
 		])
 
 	def tileRect(self, idn):
@@ -120,7 +122,7 @@ class TileMap:
 
 
 	def tileSet(self, tid):
-		ids = sorted(self.tilesets.keys(),reverse = True)
+		ids = sorted(self.tilesets.keys(), reverse = True)
 		ts = None
 		for k in ids:
 			if tid>=k:

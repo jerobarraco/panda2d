@@ -54,9 +54,9 @@ class Mundo(panda2d.World):
 		#self.pixel2d.setOccluder(occluder_nodepath)
 		#t = loader.loadTexture("data/spritesheet.png")
 		self.t = loader.loadTexture("data/gato.png")
-		self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.node, self.cam)
-		"""
-
+		self.tmap_node = self.node.attachNewNode("tilemap")
+		#self.tmap_node.setPos(-300, 0, -100)
+		self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.tmap_node, self.cam)
 		self.ss = panda2d.sprites.SimpleSprite(t, (50, 1, 50), Vec4(0, 0, 32, 32), self.node)
 
 		self.atlas = panda2d.sprites.Atlas("data", "spritesheet")
@@ -76,7 +76,6 @@ class Mundo(panda2d.World):
 		#os.add("algo", 20)
 
 		self.cam_node.setCullCenter(self.blast)
-		"""
 		"""self.md = MeshDrawer2D()
 		self.md.setBudget(100)
 		r = self.md.getRoot()
