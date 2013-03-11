@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
+import direct.task.TaskManagerGlobal
 
 from pandac.PandaModules import Vec4, Vec3, Vec2, Texture
-from panda3d.core import SceneGraphAnalyzerMeter
+from panda3d.core import MeshDrawer
 
 import itertools
 import panda2d.sprites
@@ -20,6 +21,16 @@ class Layer:
 		self.tilemap = self.layer_type== 'tilelayer'
 		self.cam = tilemap.cam
 		self.parent = tilemap.parent
+		self.color = Vec4(1,1,1,1)#rgba?
+		self.m  = MeshDrawer()
+		self.m.setBudget(100)
+		self.r = self.m.getRoot()
+		self.r.setDepthWrite(False)
+		self.r.setTransparency(True)
+		self.r.reparentTo(self.parent)
+		#self.r.setTwoSided(True)
+		#self.r.setBin("fixed",0)
+
 		if self.tilemap :
 			self.loadTiles(d, tilemap)
 
@@ -49,14 +60,24 @@ class Layer:
 					rect = ts.tileRect(tile_id)
 					if self.texture is None:
 						self.texture = ts.texture
-					sp = panda2d.sprites.SimpleSprite(ts.texture, pos, rect, cols[i/col_width])
-					row.append(sp)
+					bill = (pos, rect, tw, self.color)
+					row.append(bill)
 				x+= tw
 			self.tiles.append(list(row))
 
 			y += tilemap.tileheight
 
 		self.tiles = list(self.tiles)
+		self.r.setTexture(self.texture)
+		direct.task.TaskManagerGlobal.taskMgr.add(self.draw , "draw-tilema-"+self.name)
+
+	def draw(self, task):
+		self.m.begin(self.cam, self.node)
+		for row in self.tiles:
+			for bill in row:
+				self.m.billboard(bill)#rgbA
+		self.m.end()
+		return task.cont
 
 
 class TileSet():
