@@ -72,10 +72,10 @@ class Layer:
 		direct.task.TaskManagerGlobal.taskMgr.add(self.draw , "draw-tilema-"+self.name)
 
 	def draw(self, task):
-		self.m.begin(self.cam, self.node)
+		self.m.begin(self.cam, self.parent)
 		for row in self.tiles:
 			for bill in row:
-				self.m.billboard(bill)#rgbA
+				self.m.billboard(*bill)#rgbA
 		self.m.end()
 		return task.cont
 
