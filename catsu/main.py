@@ -29,6 +29,7 @@ from panda3d.core import SceneGraphAnalyzerMeter
 import panda2d
 import panda2d.sprites
 import panda2d.tiles
+import panda2d.old_tiles
 import catsu.models
 
 class Mundo(panda2d.World):
@@ -48,15 +49,16 @@ class Mundo(panda2d.World):
 		return task.done
 
 	def addSprite(self):
-		"""occluder = OccluderNode('my occluder')
+		occluder = OccluderNode('my occluder')
 		occluder.setVertices( Point3(0, 0, 0), Point3(320, 0, 0), Point3(320, 0, 480), Point3(0, 0, 480))
 		occluder_nodepath = self.node.attachNewNode(occluder)
-		self.pixel2d.setOccluder(occluder_nodepath)"""
+		self.pixel2d.setOccluder(occluder_nodepath)
 		t = loader.loadTexture("data/spritesheet.png")
 		#self.t = loader.loadTexture("data/gato.png")
 		self.tmap_node = self.node.attachNewNode("tilemap")
 		#self.tmap_node.setPos(-300, 0, -100)
-		self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.tmap_node, self.cam)
+		#self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.tmap_node, self.cam)
+		self.tilemap = panda2d.old_tiles.TileMap("data/world/level1", "level.json", self.tmap_node)
 		self.ss = panda2d.sprites.SimpleSprite(t, (50, 1, 50), Vec4(0, 0, 32, 32), self.node)
 
 		self.atlas = panda2d.sprites.Atlas("data", "spritesheet")

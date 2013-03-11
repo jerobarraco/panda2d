@@ -18,7 +18,7 @@ class Layer:
 		for at in ('width', 'height', 'x', 'y', 'visible', 'name', 'opacity'):
 			setattr(self, at, d[at])
 		self.layer_type = d['type']
-		self.tilemap = self.layer_type== 'tilelayer'
+		self.tilemap = self.layer_type == 'tilelayer'
 		self.cam = tilemap.cam
 		self.parent = tilemap.parent
 		self.color = Vec4(1,1,1,1)#rgba?
