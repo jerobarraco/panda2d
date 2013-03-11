@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 import json
+import direct.task.TaskManagerGlobal
 
 from pandac.PandaModules import Vec4, Vec3, Vec2, Texture
+from panda3d.core import MeshDrawer
 
 import itertools
 import panda2d.sprites
-
 
 def grouper(iterable, n, fillvalue=None):
 	"grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
 	args = [iter(iterable)] * n
 	return itertools.izip_longest(fillvalue=fillvalue, *args)
-
 
 class Layer:
 	def __init__(self, d, tilemap):
@@ -19,6 +19,19 @@ class Layer:
 			setattr(self, at, d[at])
 		self.layer_type = d['type']
 		self.tilemap = self.layer_type== 'tilelayer'
+		self.cam = tilemap.cam
+		self.parent = tilemap.parent
+		self.color = Vec4(1,1,1,1)#rgba?
+		self.depth = 3
+		self.m  = MeshDrawer()
+		self.m.setBudget(1000)
+		self.r = self.m.getRoot()
+		self.r.setDepthWrite(False)
+		self.r.setTransparency(True)
+		self.r.reparentTo(self.parent)
+		#self.r.setTwoSided(True)
+		#self.r.setBin("fixed",0)
+
 		if self.tilemap :
 			self.loadTiles(d, tilemap)
 
@@ -34,33 +47,40 @@ class Layer:
 		#(we could create groups but i dont feel like it now)
 		#this is very inneficient, if we could iterate the columns instead of rows, maybe it will be more efficient
 		tw = tilemap.tilewidth
+		th = tilemap.tileheight
 		col_width = 5
 		col_real_width = tw*col_width
-		cols = []
-		for i in range(len(self.tiles_id [0])/col_width):
-			col = tilemap.parent.attachNewNode("map_column%s"%i)
-			col.setX(i*col_real_width)
-			cols.append(col)
-
+		self.texture = None
 		for row_id in reversed(self.tiles_id):
-			#row = []
+			row = []
+			x = -tw*4
 			for i, tile_id in enumerate(row_id):
-				if i%col_width == 0:
-					x = 0
 				if tile_id:
-
-					pos = Vec3(x, 3, y)
+					pos = Vec3(x, self.depth, y)
 					ts = tilemap.tileSet(tile_id)
 					rect = ts.tileRect(tile_id)
-					sp = panda2d.sprites.SimpleSprite(ts.texture, pos, rect, cols[i/col_width])
-					#row.append(sp)
+					if self.texture is None:
+						self.texture = ts.texture
+					#self.m.billboard((50, 0, 50), (0, 0, 1, 1) , 10,  (1,1,1,1))#rgbA
+					bill = (pos, rect, tw, self.color)
+					row.append(bill)
 				x+= tw
+			self.tiles.append(list(row))
+			y += th
 
-			#self.tiles.append(list(row))
-			y += tilemap.tileheight
-		#this improves performance! thanks thomasEgi you're so cool! ( http://www.panda3d.org/forums/viewtopic.php?p=24102#24102 )
-		for col in cols:
-			col.flattenStrong()
+		self.tiles = list(self.tiles)
+		self.r.setTexture(self.texture)
+		direct.task.TaskManagerGlobal.taskMgr.add(self.draw , "draw-tilema-"+self.name)
+
+	def draw(self, task):
+		self.m.begin(self.cam, self.parent)
+		for row in self.tiles:
+			for bill in row:
+				#print bill
+				self.m.billboard(*bill)
+		self.m.end()
+		return task.cont
+
 
 class TileSet():
 	def __init__(self, d, dir):
@@ -72,13 +92,20 @@ class TileSet():
 		self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
 		self.width = self.imagewidth / self.tilewidth
 		self.height = self.imageheight / self.tileheight
-		self.rects = [
-			[
-				Vec4(j*self.tilewidth, i*self.tileheight, self.tilewidth, self.tileheight)
+		w = 1.0/self.width
+		h = 1.0/self.height
+		#Vec4 coordinates starts counting from the bottom left, counting to the top right.
+		# If you had a 16x16 plate, the 15th field in the 11th row would be:
+		# Vec4(14.0/16,5.0/16,1.0/16,1.0/16.)
+		self.rects = list([
+			list([
+				Vec4(j*w, i*h, w, h)
+				#Vec4(0,0,1,1) #Frame of Vec4(0,0,1,1) would be the entire texture
+				#Vec4(j*tw, i*th, tw, th)
 				for j in range(self.width)
-			]
+			])
 			for i in range(self.height)
-		]
+		])
 
 	def tileRect(self, idn):
 		real_id = idn - self.firstgid
@@ -87,8 +114,9 @@ class TileSet():
 		return self.rects[i][j]
 
 class TileMap:
-	def __init__(self, dir, file, parent):
+	def __init__(self, dir, file, parent, cam):
 		self.parent = parent
+		self.cam = cam
 		self.js = json.load(open(dir+'/'+file, 'r'))
 		for at in ('width', 'height', 'tileheight', 'tilewidth'):
 			setattr(self, at, self.js[at])
