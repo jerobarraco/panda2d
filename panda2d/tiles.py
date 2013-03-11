@@ -24,7 +24,7 @@ class Layer:
 		self.color = Vec4(1,1,1,1)#rgba?
 		self.depth = 3
 		self.m  = MeshDrawer()
-		self.m.setBudget(100)
+		self.m.setBudget(1000)
 		self.r = self.m.getRoot()
 		self.r.setDepthWrite(False)
 		self.r.setTransparency(True)
@@ -61,6 +61,7 @@ class Layer:
 					rect = ts.tileRect(tile_id)
 					if self.texture is None:
 						self.texture = ts.texture
+					#self.m.billboard((50, 0, 50), (0, 0, 1, 1) , 10,  (1,1,1,1))#rgbA
 					bill = (pos, rect, tw, self.color)
 					row.append(bill)
 				x+= tw
@@ -75,6 +76,7 @@ class Layer:
 		self.m.begin(self.cam, self.parent)
 		for row in self.tiles:
 			for bill in row:
+				#print bill
 				self.m.billboard(*bill)
 		self.m.end()
 		return task.cont
@@ -90,16 +92,20 @@ class TileSet():
 		self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
 		self.width = self.imagewidth / self.tilewidth
 		self.height = self.imageheight / self.tileheight
-		tw = float (self.tilewidth)
-		th = float (self.tileheight)
-		self.rects = list([
-			list([
-				Vec4(j+1/tw, i+1/th, 1.0/tw, 1.0/th)
+		w = 1.0/self.width
+		h = 1.0/self.height
+		#Vec4 coordinates starts counting from the bottom left, counting to the top right.
+		# If you had a 16x16 plate, the 15th field in the 11th row would be:
+		# Vec4(14.0/16,5.0/16,1.0/16,1.0/16.)
+		self.rects = (
+			(
+				Vec4(j/h, i/h, w, h)
+				#Vec4(0,0,1,1) #Frame of Vec4(0,0,1,1) would be the entire texture
 				#Vec4(j*tw, i*th, tw, th)
 				for j in range(self.width)
-			])
+			)
 			for i in range(self.height)
-		])
+		)
 
 	def tileRect(self, idn):
 		real_id = idn - self.firstgid
