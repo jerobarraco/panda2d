@@ -53,7 +53,7 @@ class Layer:
 		self.texture = None
 		for row_id in reversed(self.tiles_id):
 			row = []
-			x = 0
+			x = -tw*4
 			for i, tile_id in enumerate(row_id):
 				if tile_id:
 					pos = Vec3(x, self.depth, y)
@@ -97,15 +97,15 @@ class TileSet():
 		#Vec4 coordinates starts counting from the bottom left, counting to the top right.
 		# If you had a 16x16 plate, the 15th field in the 11th row would be:
 		# Vec4(14.0/16,5.0/16,1.0/16,1.0/16.)
-		self.rects = (
-			(
-				Vec4(j/h, i/h, w, h)
+		self.rects = list([
+			list([
+				Vec4(j*w, i*h, w, h)
 				#Vec4(0,0,1,1) #Frame of Vec4(0,0,1,1) would be the entire texture
 				#Vec4(j*tw, i*th, tw, th)
 				for j in range(self.width)
-			)
+			])
 			for i in range(self.height)
-		)
+		])
 
 	def tileRect(self, idn):
 		real_id = idn - self.firstgid
