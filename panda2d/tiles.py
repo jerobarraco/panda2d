@@ -90,13 +90,15 @@ class TileSet():
 		self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
 		self.width = self.imagewidth / self.tilewidth
 		self.height = self.imageheight / self.tileheight
-		self.rects = [
-			[
-				Vec4(j*self.tilewidth, i*self.tileheight, self.tilewidth, self.tileheight)
+		tw = float (self.tilewidth)
+		th = float (self.tileheight)
+		self.rects = list([
+			list([
+				Vec4(j/tw, i/th, 1.0/tw, 1.0/th)
 				for j in range(self.width)
-			]
+			])
 			for i in range(self.height)
-		]
+		])
 
 	def tileRect(self, idn):
 		real_id = idn - self.firstgid
