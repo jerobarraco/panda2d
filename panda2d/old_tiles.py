@@ -15,26 +15,38 @@ def grouper(iterable, n, fillvalue=None):
 
 class Tile(NodePath):
 	def __init__(self, texture, pos, rect, parent):
-		self.tw, self.th = texture.getXSize(), texture.getYSize()
+		self.tw, self.th = map(float, (texture.getXSize(), texture.getYSize()))
 		self.cm = CardMaker('spritesMaker')
 		#read note on animated sprite
-		self.x, self.y, self.z = pos
-		self.ox, self.oy, self.w, self.h = rect
+		self.x, self.y, self.z = pos#pixel coords
+		self.ox, self.oy, self.w, self.h = rect#pixel coords
+
 		self.cm.setFrame(self.x, self.x+self.w, self.z, self.z+self.h)
 		self.cm.setHasUvs(True)
-		self.cm.setUvRange((self.w, 0), (0, self.h))
+
+		tx1 = self.ox / self.tw
+		tx2 = (self.ox + self.w) / self.tw
+		#y coords for oy is 0-up, y coords for text is 0-up so dont forget to do the conversion (th- ...)
+		ty1 = (self.th - self.oy ) / self.th
+		ty2 = (self.th - self.oy - self.h) / self.th
+
+		pw, ph = 1/self.tw, 1/self.th #1 pixel
+
+
+		#ll , ur (acronims for LowerLeft and UpperRight?)
+		self.cm.setUvRange( (tx1+pw, ty2+ph), (tx2-pw-pw, ty1-ph-ph))
+		#This is mamamamamammaaagic! (shaders my .py!)
+		#+/- pw/ph contracts the texture 1 pixel because it shows some artifacts...
+		# (todo, find how to disable antialas altoghether)
 		NodePath.__init__(self, self.cm.generate())
-
 		self.setTexture(texture, 1)
-		#self.setPos(pos)
-		#self.setScale(rect[2], 1.0, rect[3])
-		ts = TextureStage.getDefault()
+		#ts = TextureStage.getDefault()
+		#using setUVRange we dont need to do this (actually equivalent (in apparent results))
+		#self.setTexScale(ts, self.w/self.tw, self.h/self.th)
+		#ofx = self.ox/self.tw
+		#ofy = (self.oy+self.h)/self.th
+		#self.setTexOffset(ts, ofx, -ofy)
 
-		self.setTexScale(ts, 1/self.tw, self.h/self.th)
-		#read animated sprite on notes
-		ofx = self.ox/self.tw #rect[0]/self.tw
-		ofy = (self.oy+self.h)/self.th#(rect[1]+rect[3])/self.th
-		self.setTexOffset(ts, ofx, -ofy)
 		self.reparentTo(parent)
 		self.setTransparency(True)
 """
