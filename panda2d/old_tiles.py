@@ -31,13 +31,19 @@ class Tile(NodePath):
 		ty2 = (self.th - self.oy - self.h) / self.th
 
 		pw, ph = 1/self.tw, 1/self.th #1 pixel
+		hph = ph/2.0 #half pixel
 
+		#self.cm.setUvRange( (tx1, ty2+hph), (tx2, ty1))
 
 		#ll , ur (acronims for LowerLeft and UpperRight?)
-		self.cm.setUvRange( (tx1+pw, ty2+ph), (tx2-pw-pw, ty1-ph-ph))
+		# (nearest fails to show a fixed texture, it alternates between 1px up and down when it moves. so.. 0.5 px sounds ok
+		self.cm.setUvRange( (tx1, ty2+hph), (tx2, ty1-hph))
+		# ty2-hph  ty1-hph works for minified textures, ty2 ty1 works for magnified textures
+		# to make it work for boths i need to crop it by 1px (half from top, half from bottom) (but crops 1 px)
+
+		#self.cm.setUvRange( (tx1, ty2), (tx2, ty1))
 		#This is mamamamamammaaagic! (shaders my .py!)
 		#+/- pw/ph contracts the texture 1 pixel because it shows some artifacts...
-		# (todo, find how to disable antialas altoghether)
 		NodePath.__init__(self, self.cm.generate())
 		self.setTexture(texture, 1)
 		#ts = TextureStage.getDefault()
@@ -124,8 +130,10 @@ class TileSet():
 							 'tileheight', 'tilewidth', 'transparentcolor'):
 			setattr(self, at, d[at])
 		self.texture = loader.loadTexture(dir+'/'+self.image)
-		self.texture.setMinfilter(Texture.FTLinearMipmapLinear)
-		self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
+		#self.texture.setMinfilter(Texture.FTLinearMipmapLinear)
+		#self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
+		self.texture.setMinfilter(Texture.FTLinear)
+		self.texture.setMagfilter(Texture.FTNearest)#important
 		self.width = self.imagewidth / self.tilewidth
 		self.height = self.imageheight / self.tileheight
 		self.rects = list([
