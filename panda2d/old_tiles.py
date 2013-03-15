@@ -2,9 +2,10 @@
 import json
 
 from pandac.PandaModules import Vec4, Vec3, Vec2, Texture
-
+from pandac.PandaModules import NodePath
+from pandac.PandaModules import CardMaker
+from pandac.PandaModules import TextureStage
 import itertools
-import panda2d.sprites
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -12,6 +13,49 @@ def grouper(iterable, n, fillvalue=None):
 	args = [iter(iterable)] * n
 	return itertools.izip_longest(fillvalue=fillvalue, *args)
 
+class Tile(NodePath):
+	def __init__(self, texture, pos, rect, parent):
+		self.tw, self.th = texture.getXSize(), texture.getYSize()
+		self.cm = CardMaker('spritesMaker')
+		#read note on animated sprite
+		self.x, self.y, self.z = pos
+		self.ox, self.oy, self.w, self.h = rect
+		self.cm.setFrame(self.x, self.x+self.w, self.z, self.z+self.h)
+		self.cm.setHasUvs(True)
+		self.cm.setUvRange((self.w, 0), (0, self.h))
+		NodePath.__init__(self, self.cm.generate())
+
+		self.setTexture(texture, 1)
+		#self.setPos(pos)
+		#self.setScale(rect[2], 1.0, rect[3])
+		ts = TextureStage.getDefault()
+
+		self.setTexScale(ts, 1/self.tw, self.h/self.th)
+		#read animated sprite on notes
+		ofx = self.ox/self.tw #rect[0]/self.tw
+		ofy = (self.oy+self.h)/self.th#(rect[1]+rect[3])/self.th
+		self.setTexOffset(ts, ofx, -ofy)
+		self.reparentTo(parent)
+		self.setTransparency(True)
+"""
+(3:53:34) |Craig|: try computing the offsets and adding them to the vertex positions when you make the card, instead of moving the created cards
+(3:54:16) nande: |Craig|: which offsets?
+(3:54:30) |Craig|: the ones that make the cards not all in the same place
+(3:54:47) nande: you mean the position of the card?
+(3:54:55) |Craig|: meaning leave all the card nodes at 0,0,0 (or at least the same position)
+(3:55:06) nande: ok, and how do i add to the vertexes?
+(3:55:12) |Craig|: change the settings you create them with
+(3:55:16) nande: node.getVertexs()?
+(3:56:05) |Craig|: Use http://www.panda3d.org/reference/devel/python/classpanda3d.core.CardMaker.php#a7068b0af1591eaea69e8c79733cefe29
+(3:56:29) |Craig|: I guess http://www.panda3d.org/reference/devel/python/classpanda3d.core.CardMaker.php#a6df5a5773c19ed5c162328804dda06d5 can do it auctually
+(3:56:44) |Craig|: just adjust those numbers according to the card's intended location
+(3:56:56) nande: and let position to 0,0,0?
+(3:57:00) |Craig|: ya
+(3:57:36) |Craig|: then all the vertexes should be specified in identical coordinate systems, which should avoid the issues of them rounding differently
+(3:57:47) nande: that kind of experienced tip i needed :D
+(3:58:23) nande: mm, though that would make it hard to resize it, the scale of the node should be (1, 1, 1) right?
+(3:59:02) |Craig|: if you scaled them all, it should still be ok
+(3:59:36) |Craig|: though to keep things simple, parent them all to one node, then you can move and scale that one to effect them all without messing it up"""
 
 class Layer:
 	def __init__(self, d, tilemap):
@@ -52,7 +96,7 @@ class Layer:
 					pos = Vec3(x, 3, y)
 					ts = tilemap.tileSet(tile_id)
 					rect = ts.tileRect(tile_id)
-					sp = panda2d.sprites.SimpleSprite(ts.texture, pos, rect, cols[i/col_width])
+					sp = Tile(ts.texture, pos, rect, cols[i/col_width])
 					#row.append(sp)
 				x+= tw
 
@@ -72,13 +116,13 @@ class TileSet():
 		self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
 		self.width = self.imagewidth / self.tilewidth
 		self.height = self.imageheight / self.tileheight
-		self.rects = [
-			[
+		self.rects = list([
+			list([
 				Vec4(j*self.tilewidth, i*self.tileheight, self.tilewidth, self.tileheight)
 				for j in range(self.width)
-			]
+			])
 			for i in range(self.height)
-		]
+		])
 
 	def tileRect(self, idn):
 		real_id = idn - self.firstgid
