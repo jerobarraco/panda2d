@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
+import itertools
 
 from pandac.PandaModules import Vec4, Vec3, Vec2, Texture
 from pandac.PandaModules import NodePath
 from pandac.PandaModules import CardMaker
 from pandac.PandaModules import TextureStage
-import itertools
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -41,7 +41,7 @@ class Tile(NodePath):
 		# ty2-hph  ty1-hph works for minified textures, ty2 ty1 works for magnified textures
 		# to make it work for boths i need to crop it by 1px (half from top, half from bottom) (but crops 1 px)
 		#+/- pw/ph contracts the texture 1 pixel because it shows some artifacts...
-		
+
 		#self.cm.setUvRange( (tx1, ty2), (tx2, ty1))
 		#This is mamamamamammaaagic! (shaders my .py!)
 
@@ -58,9 +58,6 @@ class Tile(NodePath):
 		self.setTransparency(True)
 """
 (3:53:34) |Craig|: try computing the offsets and adding them to the vertex positions when you make the card, instead of moving the created cards
-(3:54:16) nande: |Craig|: which offsets?
-(3:54:30) |Craig|: the ones that make the cards not all in the same place
-(3:54:47) nande: you mean the position of the card?
 (3:54:55) |Craig|: meaning leave all the card nodes at 0,0,0 (or at least the same position)
 (3:55:06) nande: ok, and how do i add to the vertexes?
 (3:55:12) |Craig|: change the settings you create them with
@@ -71,10 +68,7 @@ class Tile(NodePath):
 (3:56:56) nande: and let position to 0,0,0?
 (3:57:00) |Craig|: ya
 (3:57:36) |Craig|: then all the vertexes should be specified in identical coordinate systems, which should avoid the issues of them rounding differently
-(3:57:47) nande: that kind of experienced tip i needed :D
-(3:58:23) nande: mm, though that would make it hard to resize it, the scale of the node should be (1, 1, 1) right?
-(3:59:02) |Craig|: if you scaled them all, it should still be ok
-(3:59:36) |Craig|: though to keep things simple, parent them all to one node, then you can move and scale that one to effect them all without messing it up"""
+"""
 
 class Layer:
 	def __init__(self, d, tilemap):
@@ -147,7 +141,7 @@ class TileSet():
 
 	def tileRect(self, idn):
 		real_id = idn - self.firstgid
-		j = real_id % self.width
+		j = real_id % self.width#divmod?
 		i = int(real_id / self.width)
 		return self.rects[i][j]
 
@@ -163,7 +157,7 @@ class TileMap:
 
 
 	def tileSet(self, tid):
-		ids = sorted(self.tilesets.keys(),reverse = True)
+		ids = sorted(self.tilesets.keys(), reverse=True)
 		ts = None
 		for k in ids:
 			if tid>=k:
@@ -176,3 +170,15 @@ class TileMap:
 		if ts:
 			return ts.tileRect(idn)
 		return None
+
+class BitmapFont():
+	def __init__(self, file, charSize=(16, 16)):
+		self.texture = loader.loadTexture(dir+'/'+self.image)
+		self.charW, self.charH = charSize
+		self.tw, self.th = (texture.getXSize(), texture.getYSize())
+		self.width, self.height = self.tw/self.charW, self.th/self.charH
+
+	def getCharRect(self, row, column):
+		real_id = idn - self.firstgid
+		i = (row*self.width)+column #technically faster than divmod
+		return self.rects[i]#technically faster than 2 indexing

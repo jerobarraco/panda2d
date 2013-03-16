@@ -1,16 +1,27 @@
 # -*- coding: utf-8 -*-
 #import direct.directbase.DirectStart #da el render
 #from direct.showbase.DirectObject import DirectObject
+from panda3d.core import ConfigVariableString
+ConfigVariableString('preload-textures', '0')
+ConfigVariableString('preload-simple-textures', '1')
+ConfigVariableString('texture-compression', '1')
+ConfigVariableString('allow-incomplete-render', '1' )
+
 from pandac.PandaModules import TextureStage
 from direct.showbase.ShowBase import ShowBase
 
+""" para saber si tenemos threads"""
+#from pandac.PandaModules import Thread
+#print "threads? ", Thread.isThreadingSupported()
+
 class World(ShowBase):
-	def __init__(self, width, height, parent=None, cam=None):
+	def __init__(self, width, height, parent=None, cam=None, bgColor=(0,0,0), debug=False):
 		ShowBase.__init__(self)
+		self.setBackgroundColor(*bgColor)
 		self.width , self.height = width, height
 		if parent is None:
 			self.node = self.pixel2dp
-			self.cam = base.cam2dp
+			self.cam = self.cam2dp
 			#self.cam.setZ(2)
 		else:
 			self.node = parent
@@ -27,6 +38,11 @@ class World(ShowBase):
 		cam_lens.setFilmOffset(width/2.0, height/2.0)
 		#and works like a charm obviously :D
 
+		if debug:
+			from panda3d.core import SceneGraphAnalyzerMeter
+			self.meter = SceneGraphAnalyzerMeter('meter', self.node.node())
+			self.meter.setupWindow(self.win)
+			self.setFrameRateMeter(True)
 
 		# test some points
 		#   points = [(0,0), (screenWidth, 0), (screenWidth, screenHeight), (screenWidth/2.0, screenHeight/2.0), (0, screenHeight)]
@@ -43,27 +59,3 @@ class World(ShowBase):
 		# http://www.panda3d.org/forums/viewtopic.php?p=10968#10968
 		self.cam.setEffect(CompassEffect.make(node, CompassEffect.PPos))
 
-
-def setNode(self):
-	self.origin = parent.attachNewNode('screen_origin')
-	self.node = self.origin.attachNewNode('screen_node')
-
-	self.origin.setPos(-1.0/self.ar , 0.0, 1.0)
-	self.origin.setScale(2.0, 1.0, -2.0)
-
-	self.node.setPos(0, 0, 0)
-
-	self.node.setScale(1.0/(self.ar *width), 1.0, 1.0/height)
-	self.node.setTexScale(TextureStage.getDefault(), 1.0, -1.0)
-
-def CreateCamLayout(self):
-	self.cameras = [ base.cam2dp, base.cam, base.cam2d]
-	self.cam = base.cam2dp
-	self.cam.node().getLens().setFilmSize(width, height)
-	self.cam.setPos(240, 0, 160)
-
-def setCam():
-	base.cam2d.node().getLens().setFilmSize(width, height)
-	base.cam2d.setPos(width/2.0, 1, height/2.0)
-	base.cam2d.node().getLens().setAspectRatio(1.0)
-	base.setTexScale(TextureStage.getDefault(), 1.0, -1.0)
