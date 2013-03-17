@@ -8,20 +8,21 @@ from pandac.PandaModules import Vec4, Vec3, Vec2
 from pandac.PandaModules import TextureStage
 from panda3d.core import Texture
 
-
 class SimpleSprite(NodePath):
-	def __init__(self, texture, pos, rect, parent):
+	def __init__(self, texture, pos, parent, rect=None):
 		self.cm = CardMaker('spritesMaker')
 		#read note on animated sprite
 		self.cm.setFrame(-0.5, 0.5, -0.5, 0.5)
 		#self.cm.setHasUvs(True)
 		NodePath.__init__(self, self.cm.generate())
-
+		ts = TextureStage.getDefault()
+		tx, ty = texture.getXSize(), texture.getYSize()
+		if not rect:
+			rect = Vec4(0, 0, tx, ty)
 		self.setTexture(texture, 1)
 		self.setPos(pos)
 		self.setScale(rect[2], 1.0, rect[3])
-		ts = TextureStage.getDefault()
-		tx, ty = texture.getXSize(), texture.getYSize()
+		
 		self.setTexScale(ts, rect[2]/tx, rect[3]/ty)
 		#read animated sprite on notes
 		ofx = rect[0]/tx
