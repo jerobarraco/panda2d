@@ -2,8 +2,8 @@
 #import direct.directbase.DirectStart #da el render
 #from direct.showbase.DirectObject import DirectObject
 from panda3d.core import ConfigVariableString
-ConfigVariableString('preload-textures', '0')
-ConfigVariableString('preload-simple-textures', '1')
+#ConfigVariableString('preload-textures', '0')
+#ConfigVariableString('preload-simple-textures', '1')
 ConfigVariableString('texture-compression', '1')
 ConfigVariableString('allow-incomplete-render', '1' )
 

@@ -19,6 +19,8 @@ class SimpleSprite(NodePath):
 		tx, ty = texture.getXSize(), texture.getYSize()
 		if not rect:
 			rect = Vec4(0, 0, tx, ty)
+
+		self.rect = rect
 		self.setTexture(texture, 1)
 		self.setPos(pos)
 		self.setScale(rect[2], 1.0, rect[3])
@@ -30,6 +32,9 @@ class SimpleSprite(NodePath):
 		self.setTexOffset(ts, ofx, -ofy)
 		self.reparentTo(parent)
 		self.setTransparency(True)
+	def scaleBy(self, x, y=None):
+		if y is None: y = x
+		self.setScale(self.rect[2]*x, 1.0, self.rect[3]*y)
 
 class SpriteDef():
 	def __init__(self, lines):
