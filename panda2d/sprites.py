@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from direct.showbase.DirectObject import DirectObject
+#from direct.showbase.DirectObject import DirectObject
 from pandac.PandaModules import CollisionTraverser
 from pandac.PandaModules import NodePath
 from pandac.PandaModules import CardMaker
@@ -32,6 +31,7 @@ class SimpleSprite(NodePath):
 		self.setTexOffset(ts, ofx, -ofy)
 		self.reparentTo(parent)
 		self.setTransparency(True)
+
 	def scaleBy(self, x, y=None):
 		if y is None: y = x
 		self.setScale(self.rect[2]*x, 1.0, self.rect[3]*y)
