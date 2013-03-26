@@ -15,7 +15,8 @@ class SimpleSprite(NodePath):
 		#self.cm.setHasUvs(True)
 		NodePath.__init__(self, self.cm.generate())
 		ts = TextureStage.getDefault()
-		tx, ty = texture.getXSize(), texture.getYSize()
+		#tx, ty = texture.getXSize(), texture.getYSize()
+		tx, ty = texture.getOrigFileXSize(), texture.getOrigFileYSize() #to compensate for upscaled texture
 		if not rect:
 			rect = Vec4(0, 0, tx, ty)
 
