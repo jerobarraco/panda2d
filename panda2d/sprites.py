@@ -8,8 +8,8 @@ from pandac.PandaModules import TextureStage
 from panda3d.core import Texture
 
 class SimpleSprite(NodePath):
-	def __init__(self, texture, parent=None, pos=Vec3(0,0,0) , rect=None):
-		self.cm = CardMaker('spritesMaker')
+	def __init__(self, texture, parent=None, pos=Vec3(0,0,0) , rect=None, name="spritesMaker"):
+		self.cm = CardMaker(name)
 		#read note on animated sprite
 		self.cm.setFrame(-0.5, 0.5, -0.5, 0.5)
 		#self.cm.setHasUvs(True)
