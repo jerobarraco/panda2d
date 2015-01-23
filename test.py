@@ -17,7 +17,7 @@ class Mundo(panda2d_xml.World):
 		self.addSprites()
 
 	def addSprites(self):
-		self.atlas = panda2d_xml.sprites.Atlas("data", "newSpriteSheet")
+		self.atlas = panda2d_xml.sprites.Atlas("data", fanim="newAnimation.anim")
 		self.sp = self.atlas.newSprite('r6', self.node)
 		self.sp.setPos(50.0, 50.0, 50.0)
 		self.WALKING = self.atlas.animIndex("Animation")

@@ -137,11 +137,16 @@ class AnimatedSprite(NodePath):
 		return task.again
 
 class Atlas():
-	def __init__(self, dir, name):
-		self.parseXml(dir, name+".sprites")
-		self.parseAnimsXml(dir+'/'+name+".anim")
+	def __init__(self, dir, fanim='', fsprites=''):
+		self.texture = None
+		self.anims = []
+		fspa = ""
+		if fanim: fspa = self.parseAnimsXml(dir+'/'+fanim)
+		fsp = (fsprites or fspa)
+		self.parseXml(dir, fsp)
 
 	def parseXml(self, dir, filename):
+		print("sprite "+filename)
 		f = Dao('img', dir+'/'+filename)
 		r = f.root()
 		ftext = dir+'/'+r.name
@@ -189,14 +194,15 @@ class Atlas():
 			loops = a.loops
 			cells = []
 			for c in a.cell:
-				cc = [int(c.index), int(c.delay)/100.0]
+				cc = [int(c.index), int(c.delay)/30.0]
 				ss = [ (s.name, int(s.x), int(s.y), int(s.z)) for s in c.spr ]
 				cc.append(tuple(ss))
 				cells.append(tuple(cc))
 			print cells
 			self.anims.append(Animation(name, loops, cells))
 		self.anims = tuple(self.anims)
-
+		return spsheet
+	#don
 
 	def parse(self, dir, filename):
 		f = open(dir+'/'+filename, "r")
