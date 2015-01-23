@@ -21,7 +21,6 @@ class Mundo(panda2d_xml.World):
 		self.sp = self.atlas.newSprite('r6', self.node)
 		self.sp.setPos(50.0, 50.0, 50.0)
 		self.WALKING = self.atlas.animIndex("Animation")
-		print "aidx", self.WALKING
 		self.sp.play(self.WALKING)
 #		class Cat(panda2d.sprites.AnimatedSprite):
 #			def __init__(self, atlas, node):

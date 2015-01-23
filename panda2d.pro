@@ -24,7 +24,7 @@ DISTFILES += \
     data/spritesheet.animations \
     data/newSpriteSheet.sprites \
     data/spritesheet.sprites \
-    data/newSpriteSheet.anim \
     catsu/main.py \
-    catsu/models.py
+    catsu/models.py \
+    data/newAnimation.anim
 

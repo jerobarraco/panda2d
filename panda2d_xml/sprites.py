@@ -71,6 +71,7 @@ class Animation():
 class AnimatedSprite(NodePath):
 	state = -1
 	task = None
+	_loops = 0
 	def __init__(self, atlas, parent):
 		self.atlas = atlas
 		self.cm = CardMaker('spritesMaker')
@@ -115,6 +116,7 @@ class AnimatedSprite(NodePath):
 		self.anim = self.atlas.anims[i]
 		self.state = i
 		self.current = 0
+		self._loops = 0
 		if self.task :
 			taskMgr.remove(self.task)
 		self.task = taskMgr.doMethodLater(0, self.animate, 'animation')
@@ -132,7 +134,9 @@ class AnimatedSprite(NodePath):
 		self.current += 1
 		if self.current >= len(self.anim.frames):
 			self.current = 0
-			if not self.anim.looping:
+			print ("anim", self.anim.loops, self._loops)
+			self._loops += 1
+			if (self.anim.loops>0) and (self._loops >= self.anim.loops):
 				return task.done
 		return task.again
 
@@ -191,7 +195,7 @@ class Atlas():
 		ver = r.ver
 		for a in r.anim:
 			name = a.name
-			loops = a.loops
+			loops = int(a.loops)
 			cells = []
 			for c in a.cell:
 				cc = [int(c.index), int(c.delay)/30.0]
