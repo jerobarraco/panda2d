@@ -42,7 +42,7 @@ class Mundo(panda2d.World):
 		#self.tmap_node.setPos(-300, 0, -100)
 		#self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.tmap_node, self.cam)
 		self.tilemap = panda2d.old_tiles.TileMap("data/world/level1", "level.json", self.tmap_node)
-		self.ss = panda2d.sprites.SimpleSprite(t, (50, 1, 50), Vec4(0, 0, 32, 32), self.node)
+		self.ss = panda2d.sprites.SimpleSprite(t, self.node, (50, 1, 50), Vec4(0, 0, 32, 32))
 
 		self.atlas = panda2d.sprites.Atlas("data", "spritesheet")
 
