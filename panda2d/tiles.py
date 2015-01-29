@@ -89,7 +89,7 @@ class Tile(NodePath):
 		#padx = texture.getPadXSize()
 		pady = texture.getPadYSize()
 		#print "pads", padx, pady
-		self.oy += (pady)#TODO for textures not power of 2. doesnt work as expected
+		self.oy += pady#or textures not power of 2.
 		tx1 = self.ox / self.tw
 		tx2 = (self.ox + self.w) / self.tw
 		#y coords for oy is 0-up, y coords for text is 0-up so dont forget to do the conversion (th- ...)

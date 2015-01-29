@@ -5,8 +5,8 @@
 #help with the code here https://bitbucket.org/jerobarraco/panda2d
 #chat here #panda3d @ irc.freenode.net
 
-#TODO padded textures
-#TODO MeshDrawer optional interchangeable
+#DONE padded textures
+#DONE MeshDrawer optional interchangeable: not needed
 #TODO make a loader for sprites like the one for tiles
 #TODO support animations with more than one sprite
 #DONE go back to the animatedSprite in the same node

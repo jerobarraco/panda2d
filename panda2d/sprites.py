@@ -105,12 +105,12 @@ class AnimatedSprite(NodePath):
 
 	def debug(self, text):
 		if not hasattr(self, "_tn"):
-				text = TextNode("debug textnode")
-				text.setText('')
-				text.setTextColor(1.0, 0.2, 0.2, 1.0)
-				self._tn = self.attachNewNode(text)
-				self._tn.setScale(13)
-				self._tn.setPos(-20, -1, -20)
+			text = TextNode("debug textnode")
+			text.setText('')
+			text.setTextColor(1.0, 0.2, 0.2, 1.0)
+			self._tn = self.attachNewNode(text)
+			self._tn.setScale(13)
+			self._tn.setPos(-20, -1, -20)
 		self._tn.node().setText(str(text))
 
 	def setCollide(self, owner=None, show=False):
@@ -197,16 +197,35 @@ class AnimatedSprite(NodePath):
 		np.setPos(off)
 		
 class Atlas():
-	def __init__(self, dir, fanim='', fsprites=''):
-		self.texture = None
-		self.anims = []
+	texture = None
+	anims = tuple()
+	sprites = {}
+	
+	def animIndex(self, name):
+		for i, a in enumerate(self.anims):
+			if a.name == name:
+				return i
+		return -1
+	
+	def newSprite(self, spriteName, parent, name ="NewSprite"):
+		an = AnimatedSprite(self, parent, name)
+		#self.anims.append(Animation([spriteName, "{", "looping: false", "frame: %s,0,0,0"%spriteName, "}"]))
+		#an.play(len(self.anims)-1)
+		an.setFrame(self.frameForSp(spriteName))
+		return an
+	
+	def frameForSp(self, spriteName):
+		data = (0, 0, ( (spriteName, 0,0), ) )
+		return Frame(*data)
+	
+	def loadXml(self, dir, fanim="", fsprites=""):
 		fspa = ""
-		if fanim: fspa = self.parseAnimsXml(dir+'/'+fanim)
+		if fanim: fspa = self._parseXmlAnims(dir+'/'+fanim)
 		fsp = (fsprites or fspa)
-		self.parseXml(dir, fsp)
-
-	def parseXml(self, dir, filename):
-		print("sprite "+filename)
+		self._parseSpritesXml(dir, fsp)
+	
+	def _parseSpritesXml(self, dir, filename):
+		print("spritesheet", filename)
 		f = Dao('img', dir+'/'+filename)
 		r = f.root()
 		ftext = dir+'/'+r.name
@@ -220,7 +239,6 @@ class Atlas():
 		w = int(r.w)
 		h = int(r.h)
 		defs = r.definitions[0]
-		lines = []
 		#fake recursion cuz im lazy
 		dirs = []
 		dirs.extend(
@@ -233,10 +251,10 @@ class Atlas():
 			#path = parent+'/'+name
 			path = parent+name
 			if hasattr(dd, 'dir'):#if it has more pseudo directories (categories) in it, it add them to the "queue"
-					#print (dd)
-					dirs.extend(
-						( (ddd, path) for ddd in dd.dir )
-					)
+				#print (dd)
+				dirs.extend(
+					( (ddd, path) for ddd in dd.dir )
+				)
 			#add the sprites to this
 			#path += '/'
 			for spr in dd.spr:
@@ -246,19 +264,22 @@ class Atlas():
 				self.sprites[name] = sd
 		#done
 
-	def parseAnimsXml(self, filename):
+	def _parseXmlAnims(self, filename):
 		self.anims = []
 		spsheet = ''
 		d = Dao('animations', filename)
 		r = d.root()
 		spsheet = r.spriteSheet
 		ver = r.ver
+		print ("animations file version", ver)
 		for a in r.anim:
 			name = a.name
 			loops = int(a.loops)
 			cells = []
 			for c in a.cell:
-				cc = [int(c.index), int(c.delay)/30.0]
+				cc = [int(c.index), int(c.delay)/23.0]
+				#dunno why 23, but it is the closes value that resembles the effect on the program
+				#a delay of 10 synchronizes to Live Good (The Bloody Beetroots Remix) by Naive New Beaters
 				ss = [ (s.name, int(s.x), int(s.y), int(s.z)) for s in c.spr ]
 				cc.append(tuple(ss))
 				cells.append(tuple(cc))
@@ -266,7 +287,7 @@ class Atlas():
 			self.anims.append(Animation(name, loops, cells))
 		self.anims = tuple(self.anims)
 		return spsheet
-	#don
+	#done
 
 	def parse(self, dir, filename):
 		f = open(dir+'/'+filename, "r")
@@ -302,20 +323,4 @@ class Atlas():
 			print ("No animations for this spritesheet (%s)" % filename)
 		pass
 
-	def newSprite(self, spriteName, parent, name ="NewSprite"):
-		an = AnimatedSprite(self, parent, name)
-		#self.anims.append(Animation([spriteName, "{", "looping: false", "frame: %s,0,0,0"%spriteName, "}"]))
-		#an.play(len(self.anims)-1)
-		data = (0, 0, ( (spriteName, 0,0), ) )
-		an.setFrame(Frame(data))
-		return an
 	
-	def frameForSp(self, spriteName):
-		data = (0, 0, ( (spriteName, 0,0), ) )
-		return Frame(*data)
-	
-	def animIndex(self, name):
-		for i, a in enumerate(self.anims):
-			if a.name == name:
-				return i
-		return -1

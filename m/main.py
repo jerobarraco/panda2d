@@ -100,7 +100,8 @@ class Mundo(panda2d.world.World):
 			b.onMDead(self.m)
 		
 	def addSprites(self):
-		self.atlas = panda2d.sprites.Atlas("m/data", fanim="anim.anim")
+		self.atlas = panda2d.sprites.Atlas()
+		self.atlas.loadXml("m/data", fanim="anim.anim")
 		self.tilemap = panda2d.tiles.loadTMX("m/data", "l1.tmx", self.node)
 		self.pd = 1.0/(self.tilemap.ph or 1.0)
 		#print "pixel density", self.pd

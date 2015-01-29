@@ -73,6 +73,7 @@ class Layer:
 		direct.task.TaskManagerGlobal.taskMgr.add(self.draw , "draw-tilema-"+self.name)
 
 	def draw(self, task):
+		#this can in no way be faster than nodes handled by panda3d natively. theres no reason to port this
 		self.m.begin(self.cam, self.parent)
 		#todo optimize this
 		for row in self.tiles:
