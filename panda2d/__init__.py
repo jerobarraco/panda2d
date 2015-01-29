@@ -7,7 +7,7 @@
 
 #DONE padded textures
 #DONE MeshDrawer optional interchangeable: not needed
-#TODO make a loader for sprites like the one for tiles
+#DONE make a loader for sprites like the one for tiles
 #TODO support animations with more than one sprite
 #DONE go back to the animatedSprite in the same node
 #DONE parse the tmx file directly even xml sucks
