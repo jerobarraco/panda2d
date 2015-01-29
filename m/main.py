@@ -101,24 +101,26 @@ class Mundo(panda2d.world.World):
 		
 	def addSprites(self):
 		self.atlas = panda2d.sprites.Atlas("m/data", fanim="anim.anim")
-		self.tilemap = panda2d.tiles.TileMap("m/data", "l1.json", self.node)
+		self.tilemap = panda2d.tiles.loadTMX("m/data", "l1.tmx", self.node)
 		self.pd = 1.0/(self.tilemap.ph or 1.0)
 		#print "pixel density", self.pd
 		self.m = None
 		self.bs = []
-		lob = self.tilemap.layers['pjs']
-		self.floor_y = -lob.i
+		lob = self.tilemap.olayers['pjs']
+		#self.floor_y = -lob.i
+		#self.floor_y = -1
+		self.floor_y = -self.tilemap.layers['ipj'].i
 		for i, o in enumerate(lob.objs):
 			pos = (o.x, -lob.i, o.y)
-			if o.type_ == 'M':
+			if o.type == 'M':
 				self.m = m.models.M(self.atlas, self.node, self)
 				self.m.setPos(*pos)
 				#print pos
-			elif o.type_ == 'b':
+			elif o.type == 'b':
 				b = m.models.B(self.atlas, self.node, self)
 				b.setPos(*pos)
 				self.bs.append(b)
-			elif o.type_ == 'zone_food':
+			elif o.type == 'zone_food':
 				self.zone_food = (o.x, o.y, o.width, o.height)
 
 	def nY(self, ny):

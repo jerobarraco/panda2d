@@ -5,6 +5,11 @@
 #help with the code here https://bitbucket.org/jerobarraco/panda2d
 #chat here #panda3d @ irc.freenode.net
 
+#TODO support animations with more than one sprite
+#TODO go back to the animatedSprite in the same node
+#TODO parse the tmx file directly even xml sucks
+#TODO padded textures
+
 #import direct.directbase.DirectStart #da el render
 #from direct.showbase.DirectObject import DirectObject
 from panda3d.core import ConfigVariableString

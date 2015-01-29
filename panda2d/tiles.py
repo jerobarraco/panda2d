@@ -1,23 +1,74 @@
 # -*- coding: utf-8 -*-
 """
 This module allows to load tilemaps.
-It is meant to be used with Tiled (www.mapeditor.org/). Export it to json and load that
+It is meant to be used with Tiled (www.mapeditor.org/).
+Set the map to store the data as xml
 """
-import json
+
 import itertools
 
 from pandac.PandaModules import Vec4, Vec3, Vec2, Texture
 from pandac.PandaModules import NodePath
 from pandac.PandaModules import CardMaker
 from pandac.PandaModules import TextureStage
+from xmlDao import Dao
 
 """
 about padded textures:
 		https://www.panda3d.org/manual/index.php/Choosing_a_Texture_Size
 Instead, panda pads the data. Panda creates a 1024x512 texture, which is the smallest power-of-two size that can hold a 640x480 movie. It sticks the 640x480 movie into the lower-left corner of the texture. Then, it adds a black border to the right edge and top edge of the movie, padding it out to 1024x512.
 """
-#TODO parse the tmx file directly even xml sucks
-#TODO padded textures
+
+def loadTMX(dir, file, parent):
+	r = Dao('map', dir+'/'+file).root()
+	tm = TileMap(parent)
+	tm.dir = dir
+	tm.file = file
+	tmsize = map(int, [ getattr(r, at, 0)
+		for at in ('width', 'height', 'tileheight', 'tilewidth') ])
+	tm.setSize(*tmsize)
+	#load the tilesets
+	#less "elegant", more understandable, more portable (more loaders can be written)
+	#speed is (should be) not critical here
+	tm.tilesets = {}
+	for ts in r.tileset:
+		fgid = int(ts.firstgid)
+		img = ts.image[0]
+		rts	= TileSet(ts.name, fgid)
+		rts.loadTexture(dir+'/'+img.source, int(img.width), int(img.height))
+		rts.genRects(int(ts.tilewidth), int(ts.tileheight))
+		tm.tilesets[fgid] = rts
+
+	#load layers
+	lays = {}
+	for i, l in enumerate(r.layer):
+		n = l.name
+		w, h = map(int, [getattr(l, a, 0) for a in ('width', 'height')])
+		rl = Layer(tm, n, w, h, i)
+		#i use the grouper outside because some tile editors could be smart enough to store the data as a matrix
+		tiles = tuple(grouper(map(int, [t.gid for t in l.data[0].tile]), w))
+		rl.loadTiles(tiles)
+		lays[n] = rl
+	tm.layers = lays
+	#load object layers
+	objs = {}
+	for i, og in enumerate(r.objectgroup):
+		rol = OLayer()
+		rol.i = i
+		rol.name = og.name
+		for a in ('width', 'height', 'visible'):
+			setattr(rol, a, int(getattr(og, a, 0)))
+		#rol.visible = bool(rol.visible)
+
+		robjs = []
+		for o in og.object:
+			rect = map(int, [getattr(o, a, 0) for a in ('x', 'y', 'width', 'height')])
+			ro = Obj(getattr(o, 'name', ""), getattr(o, 'type', ''), tm.ph, *rect)
+			robjs.append(ro)
+		rol.objs = tuple(robjs)
+		objs[rol.name] = rol
+	tm.olayers = objs
+	return tm
 
 def grouper(iterable, n, fillvalue=None):
 	"grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
@@ -82,96 +133,100 @@ class Tile(NodePath):
 (3:57:36) |Craig|: then all the vertexes should be specified in identical coordinate systems, which should avoid the issues of them rounding differently
 """
 class Obj:
-	opacity = id_ = rotation = x = y = width = height = 0
-	visible = True
-	name = type_ = ""
-	
-	def __init__(self, d, layerH=0):
-		self.properties = {}
-		self.id_ = d.get('id', 0)
-		self.type_ = d.get('type', 0)
-		for at in ('width', 'height', 'x', 'y', 'visible', 'name', 'opacity', 'rotation', 'properties'):
-			setattr(self, at, d.get(at, getattr(self, at)))
-		
+	def __init__(self, name="", type="", layerH=0, x=0, y=0, width=0, height=0):
+		self.name = name
+		self.type = type
+		self.x = x
+		self.y = y
+		self.width = width
+		self.height = height
 		if layerH:	self.y = layerH - self.y
-		
+
+class OLayer:
+	i = 0
+	name = ""
+	width = 0
+	heigth = 0
+	visible = 0
+	objects = tuple()
+
 class Layer:
-	def __init__(self, d, tilemap, i=0):
-		for at in ('width', 'height', 'x', 'y', 'visible', 'name', 'opacity'):
-			setattr(self, at, d[at])
-		self.layer_type = d['type']
-		self.tilemap = self.layer_type== 'tilelayer'
-		self.objmap = self.layer_type == "objectgroup"
+	def __init__(self, tilemap, name, width, heigth, i=0):
+		self._tm = tilemap
+		self.name = name
+		self.width = width
+		self.heigth = heigth
 		self.i = i
 		self.tiles = []
 		self.objs = {}
-		
-		if self.tilemap :
-			self.loadTiles(d, tilemap)
-			
-		do = d.get('objects', None)
-		if self.objmap and do: 
-			self.loadObjects(do, tilemap.ph)
-			
-	def loadObjects(self, d, layerH=0):
-		#self.objs = { o['id']:Obj(o) for o in d}
-		self.objs = [Obj(o, layerH) for o in d]
 
-	def loadTiles(self, d, tilemap):
-		self.tiles_id = list(grouper(d['data'], self.width, 0))
-		y = 0
-		self.tiles = []
+	def loadTiles(self, tile_ids):
+		#tiles should be a matrix, if its a list use grouper "tiles_ids = list(grouper(d['data'], self.width, 0))"
+		#self.tiles = []
 		# tiled orders the array so the firsts items are the one of the top, even it has +Y coords.. which makes it stupid, but visually simpler
 		# i could get the map height in tiles and start counting on that and decreasing the Y, but i rather iterate the list inversely
 
+		y = 0
+		tw = self._tm.tilewidth
+		th = self._tm.tileheight
+		col_width = 5
+		col_real_width = tw*col_width
 		#create a vector of columns to allow for object culling http://www.panda3d.org/forums/viewtopic.php?p=26819#26819
 		#it was easier to use rows, but rows are larger, and the movement will be more likely to be horizontal. so the culling is more efficient this way
 		#(we could create groups but i dont feel like it now)
 		#this is very inneficient, if we could iterate the columns instead of rows, maybe it will be more efficient
-		tw = tilemap.tilewidth
-		th = tilemap.tileheight
-		col_width = 5
-		col_real_width = tw*col_width
 		cols = []
-		for i in range(len(self.tiles_id [0])/col_width):
-			col = tilemap.parent.attachNewNode("map_column%s"%i)
+		for i in range(len(tile_ids[0])/col_width):
+			col = self._tm.parent.attachNewNode("map_column%s"%i)
 			col.setX(i*col_real_width)
 			cols.append(col)
 		#ioff = 1.0/(len(self.tiles_id) or 1.0)
 		#print "ioff", ioff
 		#+(ioff*i)
-		pd = 1.0/tilemap.ph
-		for row_id in reversed(self.tiles_id):
+		pd = 1.0/self._tm.ph
+		for row_id in reversed(tile_ids):
 			#row = []
-			for i, tile_id in enumerate(row_id):
+			for i, tid in enumerate(row_id):
 				if i%col_width == 0:
 					x = 0
-				if tile_id:
-					pos = Vec3(x, -(self.i)+(pd*y), y)
-					ts = tilemap.tileSet(tile_id)
-					rect = ts.tileRect(tile_id)
+				if tid:
+					z = -(self.i)+(pd*(y+th))
+					pos = Vec3(x, z, y)
+					ts = self._tm.tileSet(tid)
+					rect = ts.tileRect(tid)
 					sp = Tile(ts.texture, pos, rect, cols[i/col_width])
 					#row.append(sp)
-				x+= tw
+				x += tw
 			#self.tiles.append(list(row))
-			y += tilemap.tileheight
+			y += th
 		#this improves performance! thanks thomasEgi you're so cool! ( http://www.panda3d.org/forums/viewtopic.php?p=24102#24102 )
 		for col in cols:
 			col.flattenStrong()
 
 class TileSet():
-	def __init__(self, d, dir):
-		for at in ('firstgid', 'image', 'imageheight', 'imagewidth', 'margin', 'name', 'spacing',
-							 'tileheight', 'tilewidth', 'transparentcolor'):
-			setattr(self, at, d.get(at, None))
+	name = ""
+	tilewidth = tileheight = width = height = imagewidth = imageheight = firstgid = 0
+	texture = None
+	def __init__(self, name, firstgid):
+		self.name = name
+		self.firstgid = firstgid
+
+	def loadTexture(self, file, imageheight, imagewidth):
+		self.file = file
+		self.imageheight = imageheight
+		self.imagewidth = imagewidth
+
 		from panda2d import TXFILTER, ANI
-		self.texture = loader.loadTexture(dir+'/'+self.image)
+		self.texture = loader.loadTexture(self.file)
 		self.texture.setMinfilter(TXFILTER)
 		self.texture.setMagfilter(TXFILTER)
 		#self.texture.setMinfilter(Texture.FTNearest)
 		#self.texture.setMagfilter(Texture.FTNearest)#important
 		if ANI >1: self.texture.setAnisotropicDegree(ANI)
-		
+
+	def genRects(self, tw, th):
+		self.tileheight = th
+		self.tilewidth = tw
 		self.width = self.imagewidth / self.tilewidth
 		self.height = self.imageheight / self.tileheight
 		self.rects = tuple([
@@ -179,7 +234,6 @@ class TileSet():
 				Vec4(j*self.tilewidth, i*self.tileheight, self.tilewidth, self.tileheight)
 				for j in range(self.width)
 			])
-			#for i in range(self.height-1, -1, -1)
 			for i in range(self.height)
 		])
 
@@ -194,17 +248,22 @@ class TileSet():
 		return r
 
 class TileMap:
-	def __init__(self, dir, file, parent):
+	width =	height = tilewidth = tileheight = 0
+	tilesets = {}
+	layers = {}
+	parent = None
+	def __init__(self, parent = None):
 		self.parent = parent
-		self.js = json.load(open(dir+'/'+file, 'r'))
-		for at in ('width', 'height', 'tileheight', 'tilewidth'):
-			setattr(self, at, self.js[at])
+		self.tilesets = {}
+		self.layers = {}
+
+	def setSize(self, width, height, tilewidth, tileheight):
+		self.width = width
+		self.height = height
+		self.tilewidth = tilewidth
+		self.tileheight = tileheight
 		self.pw = self.width * self.tilewidth
 		self.ph = self.height * self.tilewidth
-		
-		self.tilesets = { ts['firstgid']:TileSet(ts, dir) for ts in self.js['tilesets'] }
-		self.layers = {
-			l['name']: Layer(l, self, i) for i, l in enumerate(self.js['layers']) }
 
 	def tileSet(self, tid):
 		ids = sorted(self.tilesets.keys(), reverse=True)

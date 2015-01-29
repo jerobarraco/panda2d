@@ -27,7 +27,7 @@ class M(panda2d.sprites.AnimatedSprite ):
 	life = 2.0
 	food = 0.0
 	eu = 0.08
-	MAX_FOOD = 8
+	MAX_FOOD = 10
 	def __init__(self, atlas, node, sekai):
 		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'M' )
 		self.w = sekai
@@ -63,7 +63,7 @@ class M(panda2d.sprites.AnimatedSprite ):
 		if l<fs:
 			for i in range (int(fs-l)):
 				nf = Food(self.atlas, self)
-				nf.setPos(10*(l+i), -4 , 15)
+				nf.setPos(8*(l+i), -4 , 15)
 				nf.setScale(0.5)
 				self.foods.append(nf)
 		return True
@@ -156,7 +156,7 @@ class B(panda2d.sprites.AnimatedSprite):
 	sp = 15
 	protein = 9
 	er = 0.01#energy requirements
-	eu = 0.01#energy unit
+	eu = 0.012#energy unit
 	heu = 0.005#half of it
 	s = 1.0 #simpathy
 	h = 0.0 #hunger
@@ -223,7 +223,7 @@ class B(panda2d.sprites.AnimatedSprite):
 		self._tmove = taskMgr.add(self.move, 'bmove')
 
 	def feed(self):
-		if (self.state == self.DD) or (self.h >=1):
+		if (self.state == self.DD) or (self.h <=0):#dead or full
 			return False
 		self.h -= self.protein*self.eu
 		return True

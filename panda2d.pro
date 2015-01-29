@@ -19,5 +19,6 @@ DISTFILES += \
     m/models.py \
     m/__init__.py \
     m/main.py \
-    panda2d/new_other_tiles.py
+    panda2d/new_other_tiles.py \
+    m/data/l1.tmx
 

@@ -2,8 +2,6 @@
 """ This allows to manage Animated Sprites and spritesheets as made with darkFunction Editor.
 darkfunction.com/editor/
 """
-#TODO support animations with more than one sprite
-#TODO go back to the animatedSprite in the same node
 
 #from direct.showbase.DirectObject import DirectObject
 from pandac.PandaModules import CollisionTraverser
