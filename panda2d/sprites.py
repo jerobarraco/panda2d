@@ -106,7 +106,7 @@ class AnimatedSprite(NodePath):
 	def debug(self, text):
 		if not hasattr(self, "_tn"):
 			text = TextNode("debug textnode")
-			text.setText('')
+			text.setText(str(text))
 			text.setTextColor(1.0, 0.2, 0.2, 1.0)
 			self._tn = self.attachNewNode(text)
 			self._tn.setScale(13)

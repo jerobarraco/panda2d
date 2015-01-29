@@ -12,7 +12,7 @@
 import random as rd
 rd.seed()
 
-from pandac.PandaModules import loadPrcFileData
+#from pandac.PandaModules import loadPrcFileData
 from panda3d.core import TextNode
 size = width, height = 640, 480
 
@@ -29,7 +29,7 @@ import m.models
 class Mundo(panda2d.world.World):
 	floor_y = -1
 	def __init__(self):
-		panda2d.world.World.__init__(self, size[0], size[1], bgColor=(100, 0, 100), debug=True)
+		panda2d.world.World.__init__(self, size[0], size[1], bgColor=(100, 0, 100), debug=False)
 		self.bs = []
 		self.food = []
 		self.zone_food = (20,20,20,20)
@@ -47,7 +47,7 @@ class Mundo(panda2d.world.World):
 		
 	def setCollissions(self):
 		self.setColls(with_again=True)
-		self.ctrav.addCollider(self.m.M.cnodep, self.ch)
+		self.ctrav.addCollider(self.m.cnodep, self.ch)
 		self.accept('into-CNfood', self.hColFood)
 		self.accept('into-CNb', self.hColb)
 		self.accept('again-CNb', self.hColb)
@@ -69,7 +69,7 @@ class Mundo(panda2d.world.World):
 		nfy = y-(rd.random()*h)
 		z = self.fakeZ(nfy, self.floor_y)
 		nf.setPos(nfx, z, nfy)
-		task.delayTime = 0.5+(rd.random()*1)
+		task.delayTime = 0.7+(rd.random()*1)
 		return task.again
 	
 	def setKeys(self):

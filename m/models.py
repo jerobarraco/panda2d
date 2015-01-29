@@ -19,7 +19,7 @@ class Food (panda2d.sprites.AnimatedSprite):
 		if real:
 			self.setCollide()
 		
-class M(NodePath):#panda2d.sprites.AnimatedSprite):
+class M(panda2d.sprites.AnimatedSprite):#NodePath):#panda2d.sprites.AnimatedSprite):
 	sp = 100
 	UP = DOWN = LEFT = RIGHT = False
 	m = None
@@ -29,13 +29,14 @@ class M(NodePath):#panda2d.sprites.AnimatedSprite):
 	eu = 0.08
 	MAX_FOOD = 10
 	def __init__(self, atlas, node, sekai):
-		#panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'M' )
-		NodePath.__init__(self, node.attachNewNode("M"))
-		self.atlas = atlas
+		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'M' )
+		#NodePath.__init__(self, node.attachNewNode("M"))
+		#self.atlas = atlas
 		self.w = sekai
 		self.foods = []
-		self.M = panda2d.sprites.AnimatedSprite(self.atlas, self, "M")
-		self.M.setCollide(owner=self)
+		#self.M = panda2d.sprites.AnimatedSprite(self.atlas, self, "M")
+		#self.M.setCollide(owner=self)
+		self.setCollide()
 		self.STANDING_L = self.atlas.animIndex("stand_l")
 		self.STANDING_R = self.atlas.animIndex("stand_r")
 		self.WALKING_L = self.atlas.animIndex("walk_l")
@@ -61,12 +62,12 @@ class M(NodePath):#panda2d.sprites.AnimatedSprite):
 	def getFood(self, f):
 		if self.food >= 1.0: return False
 		self.food += self.eu
-		fs = self.food *self.MAX_FOOD
+		fs = self.food*self.MAX_FOOD
 		l = len(self.foods)
 		if l<fs:
 			for i in range(int(fs-l)):
 				nf = Food(self.atlas, self)
-				nf.setPos(5*(l+i), -8 , 15)
+				nf.setPos(5*(l+i), -4 , 15)
 				nf.setScale(.7)
 				self.foods.append(nf)
 		return True
@@ -75,7 +76,8 @@ class M(NodePath):#panda2d.sprites.AnimatedSprite):
 		print ("game over?")
 		self.w.died()
 		self.UP = self.DOWN = self.LEFT = self.RIGHT = False
-		self.M.play(self.atlas.animIndex('M_dead'))
+		self.setState(self.atlas.animIndex('M_dead'))
+		#self.play(self.atlas.animIndex('M_dead'))
 		ipos = self.getPos()
 		epos = ipos+Vec3(0, 0, 20)
 		Sequence(
@@ -87,7 +89,7 @@ class M(NodePath):#panda2d.sprites.AnimatedSprite):
 	def beat(self, task):
 		#task.delayTime += 1
 		self.life -= 0.01
-		self.M.debug(self.life)
+		#self.M.debug(self.life)
 		if self.life <=0:
 			self.die()
 			self._tbeat = None
@@ -95,12 +97,12 @@ class M(NodePath):#panda2d.sprites.AnimatedSprite):
 		else:
 			l2 = self.life
 			ec = Vec4(l2, l2, l2, 1.0)
-			self.colorScaleInterval(task.delayTime, ec).start()
+			self.card.colorScaleInterval(task.delayTime, ec).start()
 			return task.again
 		
 	def setState(self, nstate):
-		if self.M.state == nstate: return
-		self.M.play(nstate)
+		if self.state == nstate: return
+		self.play(nstate)
 
 	def setTask(self):
 		if self.m: return
@@ -109,8 +111,7 @@ class M(NodePath):#panda2d.sprites.AnimatedSprite):
 	def move(self, task):
 		dt = globalClock.getDt()
 		dy = dx = 0
-		if self.UP:
-			dy = self.sp
+		if self.UP: dy = self.sp
 		if self.DOWN: dy = -self.sp
 		if self.LEFT: dx = -self.sp
 		if self.RIGHT: dx = self.sp
@@ -154,7 +155,7 @@ class Heart(panda2d.sprites.AnimatedSprite):
 		self.B = self.atlas.animIndex(broken and "h2" or "h1")
 		self.play(self.B)
 	
-class B(NodePath):
+class B(panda2d.sprites.AnimatedSprite):#NodePath):
 	sp = 15
 	protein = 9
 	er = 0.01#energy requirements
@@ -170,17 +171,20 @@ class B(NodePath):
 	spsleep = spangry = None
 	objective = Vec3(0,0,0)
 	def __init__(self, atlas, node, world):
-		#panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, "b" )
-		NodePath.__init__(self, node.attachNewNode("BNP"))
-		self.a = atlas
+		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, "b" )
+		#NodePath.__init__(self, node.attachNewNode("BNP"))
+		#self.a = atlas
 		self.n = node
 		self.w = world
-		self.BL = self.a.animIndex("b_l")
-		self.BR = self.a.animIndex("b_r")
-		self.STILL = self.a.animIndex("b_dead")
-		self.b = panda2d.sprites.AnimatedSprite(self.a, self, "b")
-		self.b.play(rd.choice((self.BL, self.BR)))
-		self.b.setCollide(owner=self)
+		self.BL = self.atlas.animIndex("b_l")
+		self.BR = self.atlas.animIndex("b_r")
+		self.STILL = self.atlas.animIndex("b_dead")
+		#self.b = panda2d.sprites.AnimatedSprite(self.a, self, "b")
+		#self.b.play(rd.choice((self.BL, self.BR)))
+		#self.b.setCollide(owner=self)
+		self.play(rd.choice((self.BL, self.BR)))
+		self.setCollide()
+		
 		self._tstroll = None
 		self._tmove = None
 		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'bbeat')
@@ -205,7 +209,7 @@ class B(NodePath):
 		task.delayTime = 2+(rd.random()+3)
 		self.objective = Vec3(rd.random()*self.w.tilemap.pw, self.getY(), rd.random()*self.w.tilemap.ph)
 		left = (self.objective-self.getPos()).x<0
-		self.b.play(self.BL if left else self.BR)
+		self.play(self.BL if left else self.BR)
 		return task.again
 		
 	def stopBeat(self):
@@ -215,8 +219,8 @@ class B(NodePath):
 
 	def stopStroll(self):
 		if self._tmove:
-				taskMgr.remove(self._tmove)
-				self._tmove = None
+			taskMgr.remove(self._tmove)
+			self._tmove = None
 		if self._tstroll:
 			taskMgr.remove(self._tstroll)#should not execute
 			self._tstroll = None
@@ -241,7 +245,7 @@ class B(NodePath):
 		self.stopBeat()
 		self.stopStroll()
 		self.s = -1
-		self.b.play(self.STILL)
+		self.play(self.STILL)
 		ipos = self.getPos()
 		epos = ipos+Vec3(0, 0, 20)
 		Sequence(
@@ -253,8 +257,8 @@ class B(NodePath):
 	def setAngry(self, isit):
 		if isit:
 			if not self.spangry:
-				self.spangry = panda2d.sprites.AnimatedSprite(self.a, self)
-				self.spangry.play(self.a.animIndex("angry"))
+				self.spangry = panda2d.sprites.AnimatedSprite(self.atlas, self)
+				self.spangry.play(self.atlas.animIndex("angry"))
 				self.spangry.setPos(10, -0.001, 10)
 		else:
 			if self.spangry:
@@ -264,17 +268,17 @@ class B(NodePath):
 	def setSleep(self, isit):
 		if isit:
 			if not self.spsleep:
-				self.b.play(self.STILL)
+				self.play(self.STILL)
 				self.stopStroll()
-				self.spsleep = panda2d.sprites.AnimatedSprite(self.a, self)
-				self.spsleep.play(self.a.animIndex("sleepy"))
+				self.spsleep = panda2d.sprites.AnimatedSprite(self.atlas, self)
+				self.spsleep.play(self.atlas.animIndex("sleepy"))
 				self.spsleep.setPos(10, -0.001, 10)
 				self.colorScaleInterval(1, (1.0, 1.0, 1.0, 1.0)).start()
 		else:
 			if self.spsleep:
 				self.spsleep.remove()
 				self.spsleep = None
-				self.b.play(self.BR)
+				self.play(self.BR)
 				self.startStroll()
 				
 	def beat(self, task):
@@ -298,7 +302,7 @@ class B(NodePath):
 			self.colorScaleInterval(task.delayTime, ec, self.getColorScale()).start()
 		self.setAngry(hgta)
 		self.setSleep(hltz)
-		self.b.debug("%.4f\n%.4f"%(self.s, self.h))
+		#self.debug("%.4f\n%.4f"%(self.s, self.h))
 		self.s = min(1, max(0, self.s))#clamp
 		return task.again
 
@@ -308,12 +312,12 @@ class B(NodePath):
 		n = self
 		#self.node().setCenter(Point3(0, -5, 0))
 		if(self.s>0.5):
-			h = Heart(self.a, n, True)
+			h = Heart(self.atlas, n, True)
 			h.setPos(-10, -0.1, 10)
 			self.stopStroll()
 			self.setSleep(False)
 			self.setAngry(False)
-			self.b.play(self.STILL)
+			self.play(self.STILL)
 			self.colorScaleInterval(3, (0.3, 0.3, 0.8, 1.0)).start()
 			p = M.getPos()+Vec3(rd.random()*50, 0, rd.random()*50)
 			p.y = self.w.floor_y + (self.w.pd*p.z)
