@@ -4,14 +4,14 @@ darkfunction.com/editor/
 """
 
 #from direct.showbase.DirectObject import DirectObject
-from pandac.PandaModules import CollisionTraverser
+#from pandac.PandaModules import CollisionTraverser
 from pandac.PandaModules import NodePath
 from pandac.PandaModules import CardMaker
 from pandac.PandaModules import Vec4, Vec3, Vec2
 from pandac.PandaModules import TextureStage
 
 from panda3d.core import Texture, BitMask32, TextNode
-from panda3d.core import CollisionBox, CollisionNode, CollisionSphere
+from panda3d.core import CollisionNode, CollisionSphere
 
 from xmlDao import Dao
 

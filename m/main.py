@@ -12,7 +12,6 @@
 import random as rd
 rd.seed()
 
-from pandac.PandaModules import loadPrcFileData
 from panda3d.core import TextNode
 size = width, height = 640, 480
 
