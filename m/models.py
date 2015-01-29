@@ -3,8 +3,8 @@ import random as rd
 rd.seed()
 
 import panda2d.sprites
-
-from direct.showbase import DirectObject #input
+#from direct.showbase import DirectObject #input
+from pandac.PandaModules import NodePath
 from direct.interval.LerpInterval import LerpColorInterval, LerpHprScaleInterval, LerpPosHprScaleInterval, LerpPosInterval
 from direct.interval.IntervalGlobal import Sequence
 
@@ -14,24 +14,28 @@ FOODS = ('rf_0_on', 'rf_1_on', 'rf_2_on', )
 class Food (panda2d.sprites.AnimatedSprite):
 	def __init__(self, atlas, node, real=True):
 		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'food' )
-		self.setSprite(rd.choice(FOODS))
+		food = rd.choice(FOODS)
+		self.setSprite(food)
 		if real:
 			self.setCollide()
 		
-class M(panda2d.sprites.AnimatedSprite ):
+class M(NodePath):#panda2d.sprites.AnimatedSprite):
 	sp = 100
 	UP = DOWN = LEFT = RIGHT = False
 	m = None
-	nstate = -1
 	to_left = False
 	life = 2.0
 	food = 0.0
 	eu = 0.08
 	MAX_FOOD = 10
 	def __init__(self, atlas, node, sekai):
-		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'M' )
+		#panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'M' )
+		NodePath.__init__(self, node.attachNewNode("M"))
+		self.atlas = atlas
 		self.w = sekai
 		self.foods = []
+		self.M = panda2d.sprites.AnimatedSprite(self.atlas, self, "M")
+		self.M.setCollide(owner=self)
 		self.STANDING_L = self.atlas.animIndex("stand_l")
 		self.STANDING_R = self.atlas.animIndex("stand_r")
 		self.WALKING_L = self.atlas.animIndex("walk_l")
@@ -40,7 +44,6 @@ class M(panda2d.sprites.AnimatedSprite ):
 		self.setPos(30, 0, 60)
 		self.setTask()
 		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'mbeat')
-		self.setCollide()
 		
 	def giveFood(self, b):
 		if self.food <= 0:
@@ -52,7 +55,7 @@ class M(panda2d.sprites.AnimatedSprite ):
 		l = len(self.foods)
 		if fs<l:
 			for i in range(int(l-fs)):
-				if self.foods: self.foods.pop(-1).removeNode()
+				if self.foods: self.foods.pop(-1).remove()
 		return True
 	
 	def getFood(self, f):
@@ -63,8 +66,8 @@ class M(panda2d.sprites.AnimatedSprite ):
 		if l<fs:
 			for i in range (int(fs-l)):
 				nf = Food(self.atlas, self)
-				nf.setPos(8*(l+i), -4 , 15)
-				nf.setScale(0.5)
+				nf.setPos(8*(l+i), -8 , 15)
+				nf.setScale(10)
 				self.foods.append(nf)
 		return True
 	
@@ -72,7 +75,7 @@ class M(panda2d.sprites.AnimatedSprite ):
 		print ("game over?")
 		self.w.died()
 		self.UP = self.DOWN = self.LEFT = self.RIGHT = False
-		self.play(self.atlas.animIndex('M_dead'))
+		self.M.play(self.atlas.animIndex('M_dead'))
 		ipos = self.getPos()
 		epos = ipos+Vec3(0, 0, 20)
 		Sequence(
@@ -84,7 +87,7 @@ class M(panda2d.sprites.AnimatedSprite ):
 	def beat(self, task):
 		#task.delayTime += 1
 		self.life -= 0.01
-		self.debug(self.life)
+		self.M.debug(self.life)
 		if self.life <=0:
 			self.die()
 			self._tbeat = None
@@ -92,13 +95,12 @@ class M(panda2d.sprites.AnimatedSprite ):
 		else:
 			l2 = self.life
 			ec = Vec4(l2, l2, l2, 1.0)
-			self.card.colorScaleInterval(task.delayTime, ec).start()
+			self.colorScaleInterval(task.delayTime, ec).start()
 			return task.again
 		
 	def setState(self, nstate):
-		if self.state == nstate: return
-		self.state = nstate
-		self.play(nstate)
+		if self.M.state == nstate: return
+		self.M.play(nstate)
 
 	def setTask(self):
 		if self.m: return
@@ -152,7 +154,7 @@ class Heart(panda2d.sprites.AnimatedSprite):
 		self.B = self.atlas.animIndex(broken and "h2" or "h1")
 		self.play(self.B)
 	
-class B(panda2d.sprites.AnimatedSprite):
+class B(NodePath):
 	sp = 15
 	protein = 9
 	er = 0.01#energy requirements
@@ -164,26 +166,28 @@ class B(panda2d.sprites.AnimatedSprite):
 	H = 1#hungry
 	D = 2#dying
 	DD = 3#dead
-	state = 0
+	bstate = 0
 	spsleep = spangry = None
 	objective = Vec3(0,0,0)
 	def __init__(self, atlas, node, world):
-		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, "b" )
+		#panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, "b" )
+		NodePath.__init__(self, node.attachNewNode("BNP"))
 		self.a = atlas
 		self.n = node
 		self.w = world
 		self.BL = self.a.animIndex("b_l")
 		self.BR = self.a.animIndex("b_r")
 		self.STILL = self.a.animIndex("b_dead")
-		self.play(rd.choice((self.BL, self.BR)))
-		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'bbeat')
+		self.b = panda2d.sprites.AnimatedSprite(self.a, self, "b")
+		self.b.play(rd.choice((self.BL, self.BR)))
+		self.b.setCollide(owner=self)
 		self._tstroll = None
 		self._tmove = None
-		self.setCollide()
+		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'bbeat')
 
 	def move(self, task):
 		#i hate to do this but tasks are giving me a headache
-		if not self._tstroll: return task.done
+		if not (self._tstroll and self._tmove): return task.done
 		dt = globalClock.getDt()
 		speed = dt*self.sp
 		pos = self.getPos()
@@ -196,11 +200,12 @@ class B(panda2d.sprites.AnimatedSprite):
 		return task.cont
 
 	def stroll(self, task):
-		if (self.state == self.DD): return task.done
+		if (self.bstate == self.DD) or (not self._tstroll) or (not self._tmove):
+			return task.done
 		task.delayTime = 2+(rd.random()+3)
 		self.objective = Vec3(rd.random()*self.w.tilemap.pw, self.getY(), rd.random()*self.w.tilemap.ph)
 		left = (self.objective-self.getPos()).x<0
-		self.play(self.BL if left else self.BR)
+		self.b.play(self.BL if left else self.BR)
 		return task.again
 		
 	def stopBeat(self):
@@ -223,18 +228,20 @@ class B(panda2d.sprites.AnimatedSprite):
 		self._tmove = taskMgr.add(self.move, 'bmove')
 
 	def feed(self):
-		if (self.state == self.DD) or (self.h <=0):#dead or full
+		if (self.bstate == self.DD) or (self.h <=0):#dead or full
 			return False
 		self.h -= self.protein*self.eu
 		return True
 	
 	def die(self):
 		self.h = 1.0
-		self.state = self.DD
+		self.bstate = self.DD
+		self.setAngry(False)
+		self.setSleep(False)
 		self.stopBeat()
 		self.stopStroll()
 		self.s = -1
-		self.play(self.STILL)
+		self.b.play(self.STILL)
 		ipos = self.getPos()
 		epos = ipos+Vec3(0, 0, 20)
 		Sequence(
@@ -242,38 +249,36 @@ class B(panda2d.sprites.AnimatedSprite):
 			LerpPosHprScaleInterval(self, 0.5, ipos, (0,0,180), 1, blendType="easeOut"),
 			LerpColorInterval(self, 2, (0, 0, 0, 1))
 		).start()
-		self.setAngry(False)
-		self.setSleep(False)
 			
 	def setAngry(self, isit):
 		if isit:
 			if not self.spangry:
-				self.spangry = panda2d.sprites.AnimatedSprite(self.atlas, self)
-				self.spangry.play(self.atlas.animIndex("angry"))
+				self.spangry = panda2d.sprites.AnimatedSprite(self.a, self)
+				self.spangry.play(self.a.animIndex("angry"))
 				self.spangry.setPos(10, -0.001, 10)
 		else:
 			if self.spangry:
-				self.spangry.removeNode()
+				self.spangry.remove()
 				self.spangry = None
 				
 	def setSleep(self, isit):
 		if isit:
 			if not self.spsleep:
-				self.play(self.STILL)
+				self.b.play(self.STILL)
 				self.stopStroll()
-				self.spsleep = panda2d.sprites.AnimatedSprite(self.atlas, self)
-				self.spsleep.play(self.atlas.animIndex("sleepy"))
+				self.spsleep = panda2d.sprites.AnimatedSprite(self.a, self)
+				self.spsleep.play(self.a.animIndex("sleepy"))
 				self.spsleep.setPos(10, -0.001, 10)
-				self.card.colorScaleInterval(1, (1.0, 1.0, 1.0, 1.0)).start()
+				self.colorScaleInterval(1, (1.0, 1.0, 1.0, 1.0)).start()
 		else:
 			if self.spsleep:
-				self.spsleep.removeNode()
+				self.spsleep.remove()
 				self.spsleep = None
-				self.play(self.BR)
+				self.b.play(self.BR)
 				self.startStroll()
 				
 	def beat(self, task):
-		if (self.state == self.DD): return task.done
+		if (self.bstate == self.DD): return task.done
 
 		self.h += self.er + (rd.random()*self.er)
 		hltz = self.h<0.20
@@ -290,10 +295,10 @@ class B(panda2d.sprites.AnimatedSprite):
 			if (hgta):
 				self.s -= self.eu #notice this adds to the other
 			ec = (1.0, 1.0-(self.h*0.9), 1.0-(self.h*0.8), 1.0)
-			self.card.colorScaleInterval(task.delayTime, ec, self.getColorScale()).start()
+			self.colorScaleInterval(task.delayTime, ec, self.getColorScale()).start()
 		self.setAngry(hgta)
 		self.setSleep(hltz)
-		self.debug("%.4f\n%.4f"%(self.s, self.h))
+		self.b.debug("%.4f\n%.4f"%(self.s, self.h))
 		self.s = min(1, max(0, self.s))#clamp
 		return task.again
 
@@ -308,12 +313,13 @@ class B(panda2d.sprites.AnimatedSprite):
 			self.stopStroll()
 			self.setSleep(False)
 			self.setAngry(False)
-			self.play(self.STILL)
-			self.card.colorScaleInterval(3, (0.3, 0.3, 0.8, 1.0)).start()
+			self.b.play(self.STILL)
+			self.colorScaleInterval(3, (0.3, 0.3, 0.8, 1.0)).start()
 			p = M.getPos()+Vec3(rd.random()*50, 0, rd.random()*50)
 			p.y = self.w.floor_y + (self.w.pd*p.z)
 			l = (self.getPos()-p).length()
 			dur = l/self.sp
+			self.objective = p
 			LerpPosInterval(self, dur, p, blendType="easeOut").start()
 
 			#self.addChild(h, (-10, -100, 10))

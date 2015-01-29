@@ -48,43 +48,41 @@ class SimpleSprite(NodePath):
 class SpriteDef():
 	def __init__(self, name, coords):
 		self.name = name
-		self.rotate = False#lines.pop(0) == True
+		self.rotate = False
 		x,y,w,h = coords
 		self.pos = Vec2(x, y)
-		self.size = Vec2(w, h)#Vec2(*map(float, lines.pop(0).split(":")[1].split(",")))
+		self.size = Vec2(w, h)
 		self.rect = Vec4(self.pos[0], self.pos[1], self.size[0], self.size[1])
 		self.orig = Vec2(w/2, h/2)
 		#self.offset = Vec2(*map(float, lines.pop(0).split(":")[1].split(",")))
 		#self.index = int(lines.pop(0).split(":")[1])
 
 class Frame():
-	def __init__(self, f):
-		self.idx, self.delay, self.sprs = f
+	def __init__(self, idn, delay, sprites):
+		self.idx, self.delay, self.sprs = idn, delay, sprites
 		s = self.sprs[0]
 		self.name = s[0]
 		self.offset = Vec2(s[1], s[2])
-		#print("frame", self.idx, self.delay, self.name, self.offset)
-		#self.delay = int(its.pop())/1000.0
-		#self.offset = Vec2(*map(float, its))
 
 class Animation():
 	def __init__(self, name, loops, frames):
 		self.name = name
 		self.loops = loops
 		self.looping = True
-		self.frames = tuple((Frame(f) for f in frames))
+		self.frames = tuple((Frame(*f) for f in frames))
 		#print('frames', self.frames)
 
 class AnimatedSprite(NodePath):
 	state = -1
 	task = None
 	_loops = 0
+	cnodep = None
 	def __init__(self, atlas, parent, name='AnimatedSprite'):
 		self.atlas = atlas
 		self.name = name
 		self.cm = CardMaker('CM'+name)
 		#|Craig| suggested this was the correct signs
-		NodePath.__init__(self, 'P'+name)
+		#NodePath.__init__(self, 'P'+name)
 		self.cm.setFrame(-0.5, 0.5, -0.5, 0.5)
 		#CAREFUL
 		#self.cm.setHasUvs(True)
@@ -95,18 +93,17 @@ class AnimatedSprite(NodePath):
 		#Using 0.5 for the extremes makes the texture look better, dunno why, also is easier to transform and some animations would
 		#require centering by nature, so is best to use that.
 
-		cmn = self.cm.generate()
-		self.card = self.attachNewNode(cmn)
-		#NodePath.__init__(self, self.cm.generate())
+		#cmn = self.cm.generate()
+		#self.card = self.attachNewNode(cmn)
+		NodePath.__init__(self, self.cm.generate())
 
-		self.card.setTexture(atlas.texture, 1)
+		self.setTexture(atlas.texture, 1)
 		self.tx, self.ty = atlas.texture.getXSize(), atlas.texture.getYSize()#Ojo con el power of 2
 		self.ts = TextureStage.getDefault()
 		self.reparentTo(parent)
 		self.setTransparency(True)
 
 	def debug(self, text):
-		return#sorry guys, no cheating
 		if not hasattr(self, "_tn"):
 				text = TextNode("debug textnode")
 				text.setText('')
@@ -116,30 +113,35 @@ class AnimatedSprite(NodePath):
 				self._tn.setPos(-20, -1, -20)
 		self._tn.node().setText(str(text))
 
-	def setCollide(self):
+	def setCollide(self, owner=None, show=False):
+		#owner sets the tag "owner" to get the python object in a collision
 		cs = CollisionSphere(0, 0, 0, 0.8)
 		#cs = CollisionBox((0,-5,0), 1, 10, 1)
 		cn = CollisionNode('CN'+self.name)
 		cn.setFromCollideMask(BitMask32(0x10))
 		cn.setCollideMask(BitMask32(0x10))
-		cnodePath = self.card.attachNewNode(cn)
+		cnodePath = self.attachNewNode(cn)
 		cnodePath.node().addSolid(cs)
-		#cnodePath.show()
+
+		if show: cnodePath.show()
 		cnodePath.setColorScale(0.1,0.1,0.1,0.1)
+
+		if not owner: owner = self
+		cnodePath.node().setPythonTag("owner", owner)
 		self.cnodep = cnodePath
-		self.cnodep.node().setPythonTag("owner", self)
 		
 	def setFrame(self, frame):
 		sp = self.atlas.sprites[frame.name]
 		rect = self.rect = sp.rect
-		self.card.setScale(rect[2], 1.0, rect[3])
-		self.card.setTexScale(self.ts, rect[2]/self.tx, rect[3]/self.ty)
+		print "Set frame", self, id(self), frame, rect
+		self.setScale(rect[2], 1.0, rect[3])
+		self.setTexScale(self.ts, rect[2]/self.tx, rect[3]/self.ty)
 
 		ofx = rect[0]/self.tx
 		#Vs are negative so i must add the sprite size
 		ofy = (rect[1]+rect[3])/self.ty
 		#vs are negative so i must substract it
-		self.card.setTexOffset(self.ts, ofx, -ofy)
+		self.setTexOffset(self.ts, ofx, -ofy)
 		#i really really would love to not have to do all this kind of stuff.
 		#having one point of reference (top-left==0,0) makes all this more natural and intuitive (which is not)
 		#right now the node origin is bottomleft, the texture origin is bottomleft but the coords are -Y
@@ -163,7 +165,16 @@ class AnimatedSprite(NodePath):
 			taskMgr.remove(self.task)
 			self.task = None
 
+	def remove(self):
+		self.stop()
+		if self.cnodep:
+			self.cnodep.node().setPythonTag("owner", None)
+		self.removeNode()
+		#self.delete()
+		#self.ignoreAll()
+
 	def animate(self, task):
+		if not self.task : return task.done
 		frame = self.anim.frames[self.current]
 		task.delayTime = frame.delay
 		self.setFrame(frame)
@@ -292,8 +303,8 @@ class Atlas():
 			print ("No animations for this spritesheet (%s)" % filename)
 		pass
 
-	def newSprite(self, spriteName, parent):
-		an = AnimatedSprite(self, parent)
+	def newSprite(self, spriteName, parent, name ="NewSprite"):
+		an = AnimatedSprite(self, parent, name)
 		#self.anims.append(Animation([spriteName, "{", "looping: false", "frame: %s,0,0,0"%spriteName, "}"]))
 		#an.play(len(self.anims)-1)
 		data = (0, 0, ( (spriteName, 0,0), ) )
@@ -302,7 +313,7 @@ class Atlas():
 	
 	def frameForSp(self, spriteName):
 		data = (0, 0, ( (spriteName, 0,0), ) )
-		return Frame(data)
+		return Frame(*data)
 	
 	def animIndex(self, name):
 		for i, a in enumerate(self.anims):

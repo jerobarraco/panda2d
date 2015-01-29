@@ -47,7 +47,7 @@ class Mundo(panda2d.world.World):
 		
 	def setCollissions(self):
 		self.setColls(with_again=True)
-		self.ctrav.addCollider(self.m.cnodep, self.ch)
+		self.ctrav.addCollider(self.m.M.cnodep, self.ch)
 		self.accept('into-CNfood', self.hColFood)
 		self.accept('into-CNb', self.hColb)
 		self.accept('again-CNb', self.hColb)
