@@ -2,10 +2,10 @@
 #Copyright 2015 Jerónimo Barraco Mármol - moongate.com.ar GPLv3 moongate.com.ar
 """Example game made in 1 day for the global game jam 2015. It is rushed, not academic.
 """
-#TODO feed the deads
-#TODO life
-#TODO get pseudo Z (Y)
-#TODO food Y
+##TODO feed the deads
+##TODO life
+##TODO get pseudo Z (Y)
+##TODO food Y
 ##TODO aspect ratio
 
 

@@ -24,7 +24,7 @@ class M(panda2d.sprites.AnimatedSprite ):
 	m = None
 	nstate = -1
 	to_left = False
-	life = 2.5
+	life = 2.0
 	food = 0.0
 	eu = 0.08
 	MAX_FOOD = 8

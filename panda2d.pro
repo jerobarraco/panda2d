@@ -18,5 +18,6 @@ DISTFILES += \
     panda2d/sprites.py \
     m/models.py \
     m/__init__.py \
-    m/main.py
+    m/main.py \
+    panda2d/new_other_tiles.py
 
