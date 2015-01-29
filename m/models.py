@@ -64,10 +64,10 @@ class M(NodePath):#panda2d.sprites.AnimatedSprite):
 		fs = self.food *self.MAX_FOOD
 		l = len(self.foods)
 		if l<fs:
-			for i in range (int(fs-l)):
+			for i in range(int(fs-l)):
 				nf = Food(self.atlas, self)
-				nf.setPos(8*(l+i), -8 , 15)
-				nf.setScale(10)
+				nf.setPos(5*(l+i), -8 , 15)
+				nf.setScale(.7)
 				self.foods.append(nf)
 		return True
 	

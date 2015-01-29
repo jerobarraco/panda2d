@@ -4,14 +4,14 @@ darkfunction.com/editor/
 """
 
 #from direct.showbase.DirectObject import DirectObject
-from pandac.PandaModules import CollisionTraverser
+#from pandac.PandaModules import CollisionTraverser
 from pandac.PandaModules import NodePath
 from pandac.PandaModules import CardMaker
 from pandac.PandaModules import Vec4, Vec3, Vec2
 from pandac.PandaModules import TextureStage
 
 from panda3d.core import Texture, BitMask32, TextNode
-from panda3d.core import CollisionBox, CollisionNode, CollisionSphere
+from panda3d.core import CollisionNode, CollisionSphere
 
 from xmlDao import Dao
 
@@ -82,7 +82,7 @@ class AnimatedSprite(NodePath):
 		self.name = name
 		self.cm = CardMaker('CM'+name)
 		#|Craig| suggested this was the correct signs
-		#NodePath.__init__(self, 'P'+name)
+		NodePath.__init__(self, 'P'+name)
 		self.cm.setFrame(-0.5, 0.5, -0.5, 0.5)
 		#CAREFUL
 		#self.cm.setHasUvs(True)
@@ -93,11 +93,11 @@ class AnimatedSprite(NodePath):
 		#Using 0.5 for the extremes makes the texture look better, dunno why, also is easier to transform and some animations would
 		#require centering by nature, so is best to use that.
 
-		#cmn = self.cm.generate()
-		#self.card = self.attachNewNode(cmn)
-		NodePath.__init__(self, self.cm.generate())
+		cmn = self.cm.generate()
+		self.card = self.attachNewNode(cmn)
+		#NodePath.__init__(self, self.cm.generate())
 
-		self.setTexture(atlas.texture, 1)
+		self.card.setTexture(atlas.texture, 1)
 		self.tx, self.ty = atlas.texture.getXSize(), atlas.texture.getYSize()#Ojo con el power of 2
 		self.ts = TextureStage.getDefault()
 		self.reparentTo(parent)
@@ -120,7 +120,7 @@ class AnimatedSprite(NodePath):
 		cn = CollisionNode('CN'+self.name)
 		cn.setFromCollideMask(BitMask32(0x10))
 		cn.setCollideMask(BitMask32(0x10))
-		cnodePath = self.attachNewNode(cn)
+		cnodePath = self.card.attachNewNode(cn)
 		cnodePath.node().addSolid(cs)
 
 		if show: cnodePath.show()
@@ -133,15 +133,14 @@ class AnimatedSprite(NodePath):
 	def setFrame(self, frame):
 		sp = self.atlas.sprites[frame.name]
 		rect = self.rect = sp.rect
-		print "Set frame", self, id(self), frame, rect
-		self.setScale(rect[2], 1.0, rect[3])
-		self.setTexScale(self.ts, rect[2]/self.tx, rect[3]/self.ty)
+		self.card.setScale(rect[2], 1.0, rect[3])
+		self.card.setTexScale(self.ts, rect[2]/self.tx, rect[3]/self.ty)
 
 		ofx = rect[0]/self.tx
 		#Vs are negative so i must add the sprite size
 		ofy = (rect[1]+rect[3])/self.ty
 		#vs are negative so i must substract it
-		self.setTexOffset(self.ts, ofx, -ofy)
+		self.card.setTexOffset(self.ts, ofx, -ofy)
 		#i really really would love to not have to do all this kind of stuff.
 		#having one point of reference (top-left==0,0) makes all this more natural and intuitive (which is not)
 		#right now the node origin is bottomleft, the texture origin is bottomleft but the coords are -Y
