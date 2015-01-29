@@ -10,7 +10,7 @@ import itertools
 from pandac.PandaModules import Vec4, Vec3, Vec2, Texture
 from pandac.PandaModules import NodePath
 from pandac.PandaModules import CardMaker
-from pandac.PandaModules import TextureStage
+#from pandac.PandaModules import TextureStage
 from xmlDao import Dao
 
 """
@@ -77,7 +77,8 @@ def grouper(iterable, n, fillvalue=None):
 
 class Tile(NodePath):
 	def __init__(self, texture, pos, rect, parent):
-		self.tw, self.th = map(float, (texture.getOrigFileXSize(), texture.getOrigFileYSize()))
+		#self.tw, self.th = map(float, (texture.getOrigFileXSize(), texture.getOrigFileYSize()))
+		self.tw, self.th = map(float, (texture.getXSize(), texture.getYSize()))
 		self.cm = CardMaker('spritesMaker')
 		#read note on animated sprite
 		self.x, self.y, self.z = pos#pixel coords
@@ -85,9 +86,10 @@ class Tile(NodePath):
 		self.cm.setFrame(self.x, self.x+self.w, self.z, self.z+self.h)
 		self.cm.setHasUvs(True)
 		#print "tile y", self.y
-#		padx = texture.getPadXSize()
-#		pady = texture.getPadYSize()
-#		self.oy += pady ~#TODO for textures not power of 2. doesnt work as expected
+		#padx = texture.getPadXSize()
+		pady = texture.getPadYSize()
+		#print "pads", padx, pady
+		self.oy += (pady)#TODO for textures not power of 2. doesnt work as expected
 		tx1 = self.ox / self.tw
 		tx2 = (self.ox + self.w) / self.tw
 		#y coords for oy is 0-up, y coords for text is 0-up so dont forget to do the conversion (th- ...)
