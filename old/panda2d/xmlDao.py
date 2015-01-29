@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#CopyRight Jerónimo Barraco Mármol 2005-2015 GPLv3
+#CopyRight Jerónimo Barraco Mármol 2005-2015 GPLv3 moongate.com.ar
 """This module defines everything needed to use an object tree for any project and file handling.
 It should only take care of handling data and xml, not on particular implementation of xml"""
 

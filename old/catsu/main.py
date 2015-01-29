@@ -36,15 +36,15 @@ class Mundo(panda2d.World):
 		occluder.setVertices( Point3(0, 0, 0), Point3(320, 0, 0), Point3(320, 0, 480), Point3(0, 0, 480))
 		occluder_nodepath = self.node.attachNewNode(occluder)
 		self.pixel2d.setOccluder(occluder_nodepath)
-		t = loader.loadTexture("data/spritesheet.png")
+		t = loader.loadTexture("catsu/data/spritesheet.png")
 		#self.t = loader.loadTexture("data/gato.png")
 		self.tmap_node = self.node.attachNewNode("tilemap")
 		#self.tmap_node.setPos(-300, 0, -100)
 		#self.tilemap = panda2d.tiles.TileMap("data/world/level1", "level.json", self.tmap_node, self.cam)
-		self.tilemap = panda2d.old_tiles.TileMap("data/world/level1", "level.json", self.tmap_node)
+		self.tilemap = panda2d.old_tiles.TileMap("catsu/data/world/level1", "level.json", self.tmap_node)
 		self.ss = panda2d.sprites.SimpleSprite(t, self.node, (50, 1, 50), Vec4(0, 0, 32, 32))
 
-		self.atlas = panda2d.sprites.Atlas("data", "spritesheet")
+		self.atlas = panda2d.sprites.Atlas("catsu/data", "spritesheet")
 
 		self.ghost = catsu.models.Ghost(self.atlas, self.node)
 		#self.ghost = panda2d.sprites.AnimatedSprite(self.atlas, self.node)

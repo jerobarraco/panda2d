@@ -81,7 +81,7 @@ class TileSet():
 	def __init__(self, d, dir):
 		for at in ('firstgid', 'image', 'imageheight', 'imagewidth', 'margin', 'name', 'spacing',
 							 'tileheight', 'tilewidth', 'transparentcolor'):
-			setattr(self, at, d[at])
+			setattr(self, at, d.get(at, None))
 		self.texture = loader.loadTexture(dir+'/'+self.image)
 		self.texture.setMinfilter(Texture.FTLinearMipmapLinear)
 		self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
