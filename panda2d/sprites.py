@@ -323,4 +323,3 @@ class Atlas():
 			print ("No animations for this spritesheet (%s)" % filename)
 		pass
 
-	
