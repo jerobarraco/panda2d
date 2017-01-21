@@ -2,7 +2,8 @@
 """
 This module allows to load tilemaps.
 It is meant to be used with Tiled (www.mapeditor.org/).
-Set the map to store the data as xml
+Set the map to store the data as xml (on Map->Map properties)
+
 """
 
 import itertools
@@ -31,8 +32,9 @@ def loadTMX(dir, file, parent):
 	#less "elegant", more understandable, more portable (more loaders can be written)
 	#speed is (should be) not critical here
 	tm.tilesets = {}
-	for ts in r.tileset:
+	for ts in getattr(r, 'tileset', []):
 		fgid = int(ts.firstgid)
+		if not hasattr(ts, "image"): continue# TODO read tile based on image collections
 		img = ts.image[0]
 		rts	= TileSet(ts.name, fgid)
 		rts.loadTexture(dir+'/'+img.source, int(img.width), int(img.height))
@@ -41,7 +43,7 @@ def loadTMX(dir, file, parent):
 
 	#load layers
 	lays = {}
-	for i, l in enumerate(r.layer):
+	for i, l in enumerate(getattr(r, 'layer', [])):
 		n = l.name
 		w, h = map(int, [getattr(l, a, 0) for a in ('width', 'height')])
 		rl = Layer(tm, n, w, h, i)
@@ -50,9 +52,10 @@ def loadTMX(dir, file, parent):
 		rl.loadTiles(tiles)
 		lays[n] = rl
 	tm.layers = lays
+
 	#load object layers
 	objs = {}
-	for i, og in enumerate(r.objectgroup):
+	for i, og in enumerate(getattr(r, "objectgroup", [])):
 		rol = OLayer()
 		rol.i = i
 		rol.name = og.name
@@ -61,7 +64,7 @@ def loadTMX(dir, file, parent):
 		#rol.visible = bool(rol.visible)
 
 		robjs = []
-		for o in og.object:
+		for o in getattr(og, "object", []):
 			rect = map(int, [getattr(o, a, 0) for a in ('x', 'y', 'width', 'height')])
 			ro = Obj(getattr(o, 'name', ""), getattr(o, 'type', ''), tm.ph, *rect)
 			robjs.append(ro)
@@ -195,6 +198,9 @@ class Layer:
 					z = -(self.i)+(pd*(y+th))
 					pos = Vec3(x, z, y)
 					ts = self._tm.tileSet(tid)
+					if not ts:
+						print ("tile %i not found"%tid)
+						continue
 					rect = ts.tileRect(tid)
 					sp = Tile(ts.texture, pos, rect, cols[i/col_width])
 					#row.append(sp)

@@ -69,3 +69,5 @@ class World(ShowBase):
 
 	def fakeZ(self, y, layer=0):
 		return layer + (y/float(self.height))
+
+	#TODO scene manager :B

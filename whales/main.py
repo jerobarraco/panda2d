@@ -2,10 +2,15 @@
 
 #Copyright 2017 GPLv3
 """
-	Example game made in 1 day for the global game jam 2017. It is rushed, not academic.
+	Example game made in <1 day for the global game jam 2017.
+	It is rushed, hacky and not academic.
+	Credits goes to :
+		Tomas Gutierrez -> Graphics
+		Jeronimo Barraco Marmol -> coding
+
 	Thanks to:
-	ThomasEgi @ irc.freenode.net/#panda3d
-	and stackoverflow :)
+		ThomasEgi @ irc.freenode.net/#panda3d
+		StackOverflow :)
 
 	Yes this is full of dirty hacks :)
 
@@ -16,12 +21,14 @@
 
 	to use pip with panda (on windows) get the "get_pip.py" and run it with
 	"ppython".
+
 """
 
 
 # TODO everything
 # TODO get mic input
-# TODO get fft level or something
+# DONE get fft level or something
+# TODO do something with the fft
 # TODO do the world
 # TODO do the scenes
 #requires pyaudio
@@ -58,11 +65,8 @@ class Mundo(panda2d.world.World):
 	floor_y = -1
 	def __init__(self):
 		panda2d.world.World.__init__(self, size[0], size[1], bgColor=(100, 0, 100), debug=DEBUG)
-		self.bs = []
-		self.food = []
-		self.zone_food = (20,20,20,20)
 		self.addSprites()
-		self.pkevs =  (
+		"""self.pkevs =  (
 			('arrow_up', self.m.up),
 			('arrow_left', self.m.left),
 			('arrow_right', self.m.right),
@@ -71,7 +75,7 @@ class Mundo(panda2d.world.World):
 		self.evs = self.pkevs + tuple()
 		self.setKeys()
 		self._tfood = taskMgr.doMethodLater(1+(rd.random()*2), self.addFood, 'wfood')
-		self.setCollissions()
+		self.setCollissions()"""
 
 		mic.open()
 		#omg this worked so fine i'm actually scared (well not so good, a little laggy)
@@ -140,11 +144,10 @@ class Mundo(panda2d.world.World):
 	def addSprites(self):
 		self.atlas = panda2d.sprites.Atlas()
 		self.atlas.loadXml("m/data", fanim="anim.anim")
-		self.tilemap = panda2d.tiles.loadTMX("m/data", "l1.tmx", self.node)
+		self.tilemap = panda2d.tiles.loadTMX("whales/data", "l1.tmx", self.node)
 		self.pd = 1.0/(self.tilemap.ph or 1.0)
 		#print "pixel density", self.pd
-		self.m = None
-		self.bs = []
+		return
 		lob = self.tilemap.olayers['pjs']
 		#self.floor_y = -lob.i
 		#self.floor_y = -1

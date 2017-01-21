@@ -83,6 +83,7 @@ class Reader(StopThread):
 		self.stop()
 		print ("im dead")
 
+
 	def kill(self):
 		self.str.stop_stream()
 		self.str.close()
@@ -114,6 +115,7 @@ def tell():
 def die():
 	if not READER or READER.stopped(): return
 	READER.stop()
+	READER.kill()
 
 def _open():
 	global STREAM
@@ -157,7 +159,6 @@ def start():
 	worker = Thread(target=tRead, args=(_q,))
 	worker.setDaemon(True)
 	worker.start()
-
 
 
 def test ():
