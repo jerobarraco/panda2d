@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#Copyright 2015 Jerónimo Barraco Mármol - moongate.com.ar GPLv3 moongate.com.ar
+#Copyright 2017 GPLv3
 """
 	Example game made in 1 day for the global game jam 2017. It is rushed, not academic.
 	Thanks to:
 	ThomasEgi @ irc.freenode.net/#panda3d
+	and stackoverflow :)
+
 	Yes this is full of dirty hacks :)
 
 	requires pyaudio
@@ -18,10 +20,17 @@
 
 
 # TODO everything
+# TODO get mic input
+# TODO get fft level or something
+# TODO do the world
+# TODO do the scenes
 #requires pyaudio
 #requires numpy
 #can require alsaaudio
 
+import sys
+DEBUG = "debug" in sys.argv
+print (DEBUG)
 
 
 import random as rd
@@ -33,7 +42,7 @@ size = width, height = 640, 480
 
 import panda2d
 #Before importing the world we need to set up stuff. 
-panda2d.setUp(size[0], size[1], "Whales", False, (100, 100), txfilter=0, ani=0, keep_ar=True)
+panda2d.setUp(size[0], size[1], "Whales", False, (100, 100), txfilter=0, ani=0, keep_ar=True, wantTK=DEBUG)
 
 import panda2d.world
 import panda2d.sprites
@@ -43,10 +52,12 @@ import m.models
 
 import mic
 
+from direct.showbase.ShowBase import ShowBase
+
 class Mundo(panda2d.world.World):
 	floor_y = -1
 	def __init__(self):
-		panda2d.world.World.__init__(self, size[0], size[1], bgColor=(100, 0, 100), debug=False)
+		panda2d.world.World.__init__(self, size[0], size[1], bgColor=(100, 0, 100), debug=DEBUG)
 		self.bs = []
 		self.food = []
 		self.zone_food = (20,20,20,20)
@@ -61,6 +72,16 @@ class Mundo(panda2d.world.World):
 		self.setKeys()
 		self._tfood = taskMgr.doMethodLater(1+(rd.random()*2), self.addFood, 'wfood')
 		self.setCollissions()
+
+		mic.open()
+		#omg this worked so fine i'm actually scared (well not so good, a little laggy)
+		self._tupdate = taskMgr.doMethodLater(0.001, self.update, "update")
+
+	def update(self, task):
+		tf = mic.tell()
+		sys.stdout.write("\rThe freq is %f Hz." % tf)
+		return task.again
+
 		
 	def setCollissions(self):
 		self.setColls(with_again=True)
@@ -145,5 +166,17 @@ class Mundo(panda2d.world.World):
 		return self.fakeZ(ny, self.floor_y)
 
 def runWorld():
+	if not mic.CAN :
+		print(
+		"""
+		Sorry but you have no mic input, you must install numpy and at least
+		pyAudio, or AlsaAudio (not implemented) or panda3d audio on windows (not implemented)
+		or openal (not implemented and not exposed to python (you can submit a patch to panda3d))
+		or implement your own using ctypes which are always fun
+		"""
+	)
+		return "lol"
 	world = Mundo()
-	run()
+	if DEBUG: taskMgr.popupControls() #schwarts says he has them empty too
+	world.run()
+	mic.die()
