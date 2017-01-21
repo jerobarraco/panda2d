@@ -6,6 +6,14 @@
 	Thanks to:
 	ThomasEgi @ irc.freenode.net/#panda3d
 	Yes this is full of dirty hacks :)
+
+	requires pyaudio
+	requires numpy
+
+	install them with pip install pyaudio and pip install numpy
+
+	to use pip with panda (on windows) get the "get_pip.py" and run it with
+	"ppython".
 """
 
 
@@ -32,6 +40,8 @@ import panda2d.sprites
 import panda2d.tiles
 
 import m.models
+
+import mic
 
 class Mundo(panda2d.world.World):
 	floor_y = -1

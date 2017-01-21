@@ -8,9 +8,9 @@
 #DONE padded textures
 #DONE MeshDrawer optional interchangeable: not needed
 #DONE make a loader for sprites like the one for tiles
-#TODO support animations with more than one sprite
 #DONE go back to the animatedSprite in the same node
 #DONE parse the tmx file directly even xml sucks
+#TODO support animations with more than one sprite
 
 
 #import direct.directbase.DirectStart #da el render
