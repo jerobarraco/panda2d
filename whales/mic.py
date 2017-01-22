@@ -9,10 +9,14 @@ CAN = False
 NAME = "none"
 if mic_panda.CAN :
 	CAN = True
+	print "Imported Panda Mic"
 	from mic_panda import *
 elif mic_alsa.CAN:
 	CAN = True
+	print "Imported Alsa"
 	from mic_alsa import *
 elif mic_pyaudio.CAN :
 	CAN = True
+	print "Imported PyAudio"
 	from mic_pyaudio import  *
+
