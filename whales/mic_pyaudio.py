@@ -64,8 +64,9 @@ class Reader(StopThread):
 			indata = np.fromstring(data, dtype=np.int16)
 			p = 20*np.log10(np.abs(np.fft.rfft(indata))) #power ?
 			f = np.linspace(0, RATE/2.0, len(p)) #freqs?
-			pmi = p.argmax()
+			pmi = len(p) - 1 - p[::-1].argmax() #to get the last big freq (not 0)
 			pm = p[pmi]
+			if(f[pmi]< 0.001): 	return (-1, -1)
 			return (f[pmi], pm)
 		except Exception, e:
 			print("error reading audio", e)

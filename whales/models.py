@@ -17,16 +17,89 @@ class Screen(panda2d.sprites.AnimatedSprite):
 		self.setSprite("/screen")
 		self.setX(300)
 		self.setZ(240)
+		self.setY(300)
 
 
 WHALES = ('0', '1', '2', '3', '4', '5' )
+S_WHALE = ('0', '1', '2', '3', '4', '5' )
 class Whale(panda2d.sprites.AnimatedSprite):
-	def __init__(self, atlas, node, real=True):
+	SWIMMING = 0
+	DEAD = 100
+	state = 0
+	sp = 15
+	def __init__(self, atlas, node, world, wi = -11):
 		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'whale' )
-		who = rd.choice(WHALES)
+		if wi < 0 :
+			who = rd.choice(WHALES)
+		else:
+			who = WHALES[wi % len(WHALES)]
+		self.w = world
 		self.setSprite('/'+who)
 		self.setX(300)
 		self.setZ(240)
+		self.setScale(0.25)
+		self._tstroll = None
+		self._tmove = None
+		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'bbeat')
+		self.startStroll()
+
+	def beat(self, task):
+		if (self.state == self.DEAD): return task.done
+		#self.colorScaleInterval(task.delayTime, ec, self.getColorScale()).start()
+		return task.again
+
+	def stroll(self, task):
+		if (self.state == self.DEAD) or (not self._tstroll) or (not self._tmove):
+			return task.done
+		task.delayTime = 2+(rd.random()+3)
+		self.objective = Vec3(rd.random()*self.w.tilemap.pw, self.getY(), rd.random()*self.w.tilemap.ph)
+		left = (self.objective-self.getPos()).x<0
+		#self.play(self.BL if left else self.BR)
+		return task.again
+
+	def move(self, task):
+		#i hate to do this but tasks are giving me a headache
+		if not (self._tstroll and self._tmove): return task.done
+		dt = globalClock.getDt()
+		speed = dt*self.sp
+		pos = self.getPos()
+		path = self.objective-pos
+		#print "moving" , pos, self.objective, path
+		f = speed/(path.length() or 1.0)
+		path = pos+(path*f)
+		yy = self.w.nY(path.z)
+		self.setPos(path.x, yy, path.z)
+		return task.cont
+
+	def stopBeat(self):
+		if self._tbeat:
+			taskMgr.remove(self._tbeat)
+			self._tbeat = None
+
+	def stopStroll(self):
+		if self._tmove:
+			taskMgr.remove(self._tmove)
+			self._tmove = None
+		if self._tstroll:
+			taskMgr.remove(self._tstroll)#should not execute
+			self._tstroll = None
+
+	def startStroll(self):
+		self.stopStroll()
+		self.objective = self.getPos()
+		self._tstroll = taskMgr.doMethodLater(0.1, self.stroll, 'wstroll')
+		self._tmove = taskMgr.add(self.move, 'wmove')
+
+	def die(self):
+		self.stopBeat()
+		self.stopStroll()
+		ipos = self.getPos()
+		epos = ipos+Vec3(0, 0, 20)
+		Sequence(
+			LerpPosHprScaleInterval(self, 0.5, epos, (0,0,90), 1.5, blendType="easeIn"),
+			LerpPosHprScaleInterval(self, 0.5, ipos, (0,0,180), 1, blendType="easeOut"),
+			LerpColorInterval(self, 2, (0, 0, 0, 1))
+		).start()
 
 
 FOODS = ('rf_0_on', 'rf_1_on', 'rf_2_on', )

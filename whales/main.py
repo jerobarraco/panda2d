@@ -25,7 +25,7 @@
 
 """
 VOLUME = 130
-
+MAX_FREQ = 600.0
 # TODO everything
 # DONE get mic input
 # DONE get fft level or something
@@ -80,18 +80,36 @@ class Mundo(panda2d.world.World):
 		self.setCollissions()"""
 
 		mic.open()
+		self.whales = []
 		#omg this worked so fine i'm actually scared (well not so good, a little laggy)
-		self._tupdate = taskMgr.doMethodLater(0.001, self.update, "update")
+		self._tupdate = taskMgr.doMethodLater(0.0001, self.update, "update")
+
+	last_whale = 0
+	def addWhale(self, wi=-11):
+		#dt = globalClock.getDt()#silly nande D is for DIfferential
+		frameTime = globalClock.getFrameTime()
+		if frameTime - self.last_whale < 3:
+			return
+		print("new whale on the block", wi)
+		self.last_whale = frameTime
+		self.whales.append(whales.models.Whale(self.atlas, self.node, self, wi))
+
+	def act(self, tf):
+		if (self.screen):
+			#=self.screen.remove()
+			self.screen = None
+		else:
+			cwhales = len(whales.models.WHALES)
+			i = int(tf [0] / MAX_FREQ * cwhales) % cwhales
+			print(i)
+			self.addWhale(i)
 
 	def update(self, task):
 		tf = mic.tell()
 		sys.stdout.write("\rThe freq is %f Hz volume is %f." % tf)
-		if tf[1]> VOLUME:
-			if (self.screen):
-				self.screen.remove()
-				self.screen = None
-			else:
-				print ("lol")
+		if tf[1] > VOLUME:
+			self.act(tf)
+
 		return task.again
 
 		
@@ -159,10 +177,7 @@ class Mundo(panda2d.world.World):
 		self.pd = 1.0/(self.tilemap.ph or 1.0)
 		#print "pixel density", self.pd
 		self.screen = whales.models.Screen(self.atlas, self.node)
-		self.whales = list([
-			whales.models.Whale(self.atlas, self.node)
-			for i in range(10)
-		])
+
 		return
 		lob = self.tilemap.olayers['pjs']
 		#self.floor_y = -lob.i
