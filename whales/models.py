@@ -17,7 +17,6 @@ class Screen(panda2d.sprites.AnimatedSprite):
 		self.setSprite("/screen")
 		self.setX(300)
 		self.setZ(240)
-		self.setY(300)
 
 
 WHALES = ('0', '1', '2', '3', '4', '5' )
@@ -27,26 +26,28 @@ class Whale(panda2d.sprites.AnimatedSprite):
 	DEAD = 100
 	state = 0
 	sp = 15
+	love = 0
 	def __init__(self, atlas, node, world, wi = -11):
 		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'whale' )
 		if wi < 0 :
-			who = rd.choice(WHALES)
-		else:
-			who = WHALES[wi % len(WHALES)]
+			wi = int(rd.random()*len(WHALES))
+		who = WHALES[wi % len(WHALES)]
 		self.w = world
-		self.i = who
+		self.i = wi
 		self.setSprite('/'+who)
 		self.setX(300)
 		self.setZ(240)
-		self.setScale(0.25)
+		self.setScale(0.2)
 		self._tstroll = None
 		self._tmove = None
 		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'bbeat')
 		self.startStroll()
 
 	def showLove(self):
-		print ("i like that", self)
-		pass
+		t = "i like that"
+		self.debug(t)
+		self.love += 1
+		print(t)
 		#TODO ryo if you want you can do this, when this method gets called add a heart icon,
 		# you can use the same code and assets from "m"
 
@@ -58,13 +59,13 @@ class Whale(panda2d.sprites.AnimatedSprite):
 	def stroll(self, task):
 		if (self.state == self.DEAD) or (not self._tstroll) or (not self._tmove):
 			return task.done
-		task.delayTime = 2+(rd.random()+3)
+		task.delayTime = 2+(rd.random()+5)
 		self.objective = Vec3(rd.random()*self.w.tilemap.pw, self.getY(), rd.random()*self.w.tilemap.ph)
 		left = (self.objective-self.getPos()).x<0
 		#self.play(self.BL if left else self.BR)
 		return task.again
 
-	def move(self, task):
+	def move(self, task): #lol this could be done with a lerp
 		#i hate to do this but tasks are giving me a headache
 		if not (self._tstroll and self._tmove): return task.done
 		dt = globalClock.getDt()
@@ -74,7 +75,7 @@ class Whale(panda2d.sprites.AnimatedSprite):
 		#print "moving" , pos, self.objective, path
 		f = speed/(path.length() or 1.0)
 		path = pos+(path*f)
-		yy = self.w.nY(path.z)
+		yy = self.w.nY(path.z) #except for this
 		self.setPos(path.x, yy, path.z)
 		return task.cont
 

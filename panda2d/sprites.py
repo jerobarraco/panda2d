@@ -103,7 +103,7 @@ class AnimatedSprite(NodePath):
 		self.reparentTo(parent)
 		self.setTransparency(True)
 
-	def debug(self, text):
+	def debug(self, text): # this is the best thing that i could have done
 		if not hasattr(self, "_tn"):
 			text = TextNode("debug textnode")
 			text.setText(str(text))

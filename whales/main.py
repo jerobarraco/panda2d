@@ -7,6 +7,7 @@
 	Credits goes to :
 		Tomas Gutierrez -> Graphics
 		Jeronimo Barraco Marmol -> coding
+		Nicholas Oliveira -> coding and awesomeness
 
 	Thanks to:
 		ThomasEgi @ irc.freenode.net/#panda3d
@@ -101,7 +102,7 @@ class Mundo(panda2d.world.World):
 		frameTime = globalClock.getFrameTime()
 		if frameTime - self.last_whale < 2:
 			return
-		print("new whale on the block", wi)
+		#print("new whale on the block", wi)
 		self.last_whale = frameTime
 		self.whales.append(whales.models.Whale(self.atlas, self.node, self, wi))
 
@@ -127,7 +128,7 @@ class Mundo(panda2d.world.World):
 			cwhales = len(whales.models.WHALES)
 			for w in self.whales:
 				i = int(tf[0] / MAX_FREQ * cwhales) % cwhales
-				sys.stdout.write(str(i))#print(i)
+				#sys.stdout.write(str(i))#print(i)
 				if (i == w.i) :
 					w.showLove()
 
@@ -201,14 +202,16 @@ class Mundo(panda2d.world.World):
 		self.atlas.loadXml("whales/data", fsprites="sps.sprites")
 		self.tilemap = panda2d.tiles.loadTMX("whales/data", "l1.tmx", self.node)
 		self.pd = 1.0/(self.tilemap.ph or 1.0)
+		self.floor_y = -self.tilemap.layers['ipj'].i
+
 		#print "pixel density", self.pd
 		self.screen = whales.models.Screen(self.atlas, self.node)
-
+		self.screen.setY(self.floor_y+1)
+		#self.screen.debug("Hello, please configure the volume, then do like a whale")
 		return
 		lob = self.tilemap.olayers['pjs']
 		#self.floor_y = -lob.i
 		#self.floor_y = -1
-		self.floor_y = -self.tilemap.layers['ipj'].i
 		for i, o in enumerate(lob.objs):
 			pos = (o.x, -lob.i, o.y)
 			if o.type == 'M':

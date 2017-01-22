@@ -69,6 +69,7 @@ class Reader(StopThread):
 			if(f[pmi]< 0.001): 	return (-1, -1)
 			return (f[pmi], pm)
 		except Exception, e:
+			if isinstance(e, KeyboardInterrupt): raise e
 			#print("error reading audio", e)
 			return (-1, -1)
 
