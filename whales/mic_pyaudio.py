@@ -14,7 +14,7 @@ from Queue import Queue
 from threading import Thread
 
 
-CHUNK = 2048
+CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
@@ -69,7 +69,7 @@ class Reader(StopThread):
 			if(f[pmi]< 0.001): 	return (-1, -1)
 			return (f[pmi], pm)
 		except Exception, e:
-			print("error reading audio", e)
+			#print("error reading audio", e)
 			return (-1, -1)
 
 

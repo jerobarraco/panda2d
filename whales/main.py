@@ -127,14 +127,15 @@ class Mundo(panda2d.world.World):
 			cwhales = len(whales.models.WHALES)
 			for w in self.whales:
 				i = int(tf[0] / MAX_FREQ * cwhales) % cwhales
-				print(i)
+				sys.stdout.write(str(i))#print(i)
 				if (i == w.i) :
 					w.showLove()
 
 
 	def update(self, task):
 		tf = mic.tell()
-		sys.stdout.write("\rThe freq is %f Hz volume is %f." % tf)
+		#sys.stdout.write("\rFreq= %f Hz Vol= %f." % tf)
+		#sys.stdout.write(".")
 		if tf[1] > VOLUME:
 			self.act(tf)
 
@@ -194,9 +195,6 @@ class Mundo(panda2d.world.World):
 		textNodePath.setScale(70)
 		for b in self.bs:
 			b.onMDead(self.m)
-
-	def start(self):
-		pass
 
 	def addSprites(self):
 		self.atlas = panda2d.sprites.Atlas()
