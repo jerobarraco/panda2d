@@ -11,6 +11,7 @@
 	Thanks to:
 		ThomasEgi @ irc.freenode.net/#panda3d
 		StackOverflow :)
+		Tileset : http://manuxd789.deviantart.com/art/Free-use-Underwater-Tiles-RPG-Maker-XP-477146613
 
 	Yes this is full of dirty hacks :)
 
@@ -26,8 +27,9 @@
 
 
 # TODO everything
-# TODO get mic input
+# DONE get mic input
 # DONE get fft level or something
+# TODO sprites
 # TODO do something with the fft
 # TODO do the world
 # TODO do the scenes
@@ -49,13 +51,13 @@ size = width, height = 640, 480
 
 import panda2d
 #Before importing the world we need to set up stuff. 
-panda2d.setUp(size[0], size[1], "Whales", False, (100, 100), txfilter=0, ani=0, keep_ar=True, wantTK=DEBUG)
+panda2d.setUp(size[0], size[1], "Whales", False, (100, 100), txfilter=1, ani=1, keep_ar=True, wantTK=DEBUG)
 
 import panda2d.world
 import panda2d.sprites
 import panda2d.tiles
 
-import m.models
+import whales.models
 
 import mic
 
@@ -83,7 +85,7 @@ class Mundo(panda2d.world.World):
 
 	def update(self, task):
 		tf = mic.tell()
-		sys.stdout.write("\rThe freq is %f Hz." % tf)
+		sys.stdout.write("\rThe freq is %f Hz mean %f." % tf)
 		return task.again
 
 		
@@ -143,10 +145,11 @@ class Mundo(panda2d.world.World):
 		
 	def addSprites(self):
 		self.atlas = panda2d.sprites.Atlas()
-		self.atlas.loadXml("m/data", fanim="anim.anim")
+		self.atlas.loadXml("whales/data", fsprites="sscreen.sprites")
 		self.tilemap = panda2d.tiles.loadTMX("whales/data", "l1.tmx", self.node)
 		self.pd = 1.0/(self.tilemap.ph or 1.0)
 		#print "pixel density", self.pd
+		self.screen = whales.models.Screen(self.atlas, self.node)
 		return
 		lob = self.tilemap.olayers['pjs']
 		#self.floor_y = -lob.i

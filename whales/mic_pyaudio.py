@@ -54,7 +54,21 @@ class Reader(StopThread):
 
 		self.window = np.blackman(CHUNK)
 
+
 	def read(self):
+		#this is extremely dangerous
+		data = self.str.read(CHUNK)
+		# unpack the data and times by the hamming window
+		#indata = np.array(wave.struct.unpack("%dh"%(CHUNK), data))*self.window
+		indata = np.fromstring(data, dtype=np.int16)
+		p = 20*np.log10(np.abs(np.fft.rfft(indata))) #power ?
+		f = np.linspace(0, RATE/2.0, len(p)) #freqs?
+		pmi = p.argmax()
+		pm = p[pmi]
+		return (f[pmi], pm)
+
+
+	def read_(self):
 		#this is extremely dangerous
 		data = self.str.read(CHUNK)
 		# unpack the data and times by the hamming window
@@ -75,7 +89,9 @@ class Reader(StopThread):
 		# we love premature optimization
 		# find the frequency and output it
 		thefreq = (which + x1) * RATE / CHUNK
-		return thefreq
+		mean1 = indata.max(axis=0)
+
+		return (thefreq, mean1)
 
 	def run(self):
 		while not self.stopped():
@@ -98,7 +114,7 @@ def open():
 def tell():
 	global READER
 	if not READER or READER.stopped(): return
-	fq = -1.0
+	fq = (-1.0, -1.0)
 	try:
 		s = READER.q.qsize()
 		while(s):

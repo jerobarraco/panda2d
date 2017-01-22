@@ -20,7 +20,7 @@ ConfigVariableString('preload-textures', '0')
 ConfigVariableString('preload-simple-textures', '1')
 ConfigVariableString('texture-compression', '1')
 ConfigVariableString('allow-incomplete-render', '1' )
-#ConfigVariableString('textures-power-2', 'pad')#makes panda pad non-p2-sizes instead of downscaling
+ConfigVariableString('textures-power-2', 'pad')#makes panda pad non-p2-sizes instead of downscaling
 
 from pandac.PandaModules import loadPrcFileData
 loadPrcFileData("", "textures-power-2 pad")#makes panda pad non-p2-sizes instead of downscaling

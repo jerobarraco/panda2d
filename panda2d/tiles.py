@@ -17,8 +17,14 @@ from xmlDao import Dao
 """
 about padded textures:
 		https://www.panda3d.org/manual/index.php/Choosing_a_Texture_Size
-Instead, panda pads the data. Panda creates a 1024x512 texture, which is the smallest power-of-two size that can hold a 640x480 movie. It sticks the 640x480 movie into the lower-left corner of the texture. Then, it adds a black border to the right edge and top edge of the movie, padding it out to 1024x512.
+Instead, panda pads the data.
+Panda creates a 1024x512 texture,
+which is the smallest power-of-two size that can hold a 640x480 movie.
+It sticks the 640x480 movie into the lower-left corner of the texture.
+Then, it adds a black border to the right edge and top edge of the movie, padding it out to 1024x512.
+careful with paddings, try to use 1024x1024 textures
 """
+#TODO fix problem with tilesets that are padded (problem is with non-square textures)
 
 def loadTMX(dir, file, parent):
 	r = Dao('map', dir+'/'+file).root()
