@@ -12,6 +12,8 @@
 		ThomasEgi @ irc.freenode.net/#panda3d
 		StackOverflow :)
 		Tileset : http://manuxd789.deviantart.com/art/Free-use-Underwater-Tiles-RPG-Maker-XP-477146613
+		Sounds:
+			http://soundbible.com/tags-whale.html
 
 	Yes this is full of dirty hacks :)
 
@@ -23,14 +25,18 @@
 	to use pip with panda (on windows) get the "get_pip.py" and run it with
 	"ppython".
 
+	Being a whale is not easy, please help protecting them http://www.internationalwhaleprotection.org
+
 """
-VOLUME = 130
-MAX_FREQ = 600.0
+from whales.config import VOLUME, MAX_FREQ
+
+
 # TODO everything
 # DONE get mic input
 # DONE get fft level or something
 # TODO sprites
-# TODO do something with the fft
+# TODO sound for whales (wanna do this ryo?)
+# DONE do something with the fft
 # TODO do the world
 # TODO do the scenes
 #requires pyaudio

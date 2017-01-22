@@ -1,0 +1,2 @@
+VOLUME = 130
+MAX_FREQ = 600.0
