@@ -34,6 +34,7 @@ class Whale(panda2d.sprites.AnimatedSprite):
 		else:
 			who = WHALES[wi % len(WHALES)]
 		self.w = world
+		self.i = who
 		self.setSprite('/'+who)
 		self.setX(300)
 		self.setZ(240)
@@ -42,6 +43,12 @@ class Whale(panda2d.sprites.AnimatedSprite):
 		self._tmove = None
 		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'bbeat')
 		self.startStroll()
+
+	def showLove(self):
+		print ("i like that", self)
+		pass
+		#TODO ryo if you want you can do this, when this method gets called add a heart icon,
+		# you can use the same code and assets from "m"
 
 	def beat(self, task):
 		if (self.state == self.DEAD): return task.done
@@ -87,8 +94,8 @@ class Whale(panda2d.sprites.AnimatedSprite):
 	def startStroll(self):
 		self.stopStroll()
 		self.objective = self.getPos()
-		self._tstroll = taskMgr.doMethodLater(0.1, self.stroll, 'wstroll')
-		self._tmove = taskMgr.add(self.move, 'wmove')
+		self._tstroll = taskMgr.doMethodLater(0.1, self.stroll, 'wstroll') #repeat on a regular basis
+		self._tmove = taskMgr.add(self.move, 'wmove') #repeats each frame
 
 	def die(self):
 		self.stopBeat()

@@ -71,6 +71,10 @@ from direct.showbase.ShowBase import ShowBase
 
 class Mundo(panda2d.world.World):
 	floor_y = -1
+	S_INTRO = 0
+	S_GAME = 1
+	S_END = 2
+	state = 0
 	def __init__(self):
 		panda2d.world.World.__init__(self, size[0], size[1], bgColor=(100, 0, 100), debug=DEBUG)
 		self.addSprites()
@@ -87,28 +91,46 @@ class Mundo(panda2d.world.World):
 
 		mic.open()
 		self.whales = []
-		#omg this worked so fine i'm actually scared (well not so good, a little laggy)
-		self._tupdate = taskMgr.doMethodLater(0.0001, self.update, "update")
+
+		self._tspawn = None
+		self._tupdate = taskMgr.add(self.update, "main_update")# taskMgr.doMethodLater(0.0001, self.update, "update")
 
 	last_whale = 0
 	def addWhale(self, wi=-11):
 		#dt = globalClock.getDt()#silly nande D is for DIfferential
 		frameTime = globalClock.getFrameTime()
-		if frameTime - self.last_whale < 3:
+		if frameTime - self.last_whale < 2:
 			return
 		print("new whale on the block", wi)
 		self.last_whale = frameTime
 		self.whales.append(whales.models.Whale(self.atlas, self.node, self, wi))
 
-	def act(self, tf):
-		if (self.screen):
-			#=self.screen.remove()
+	def spawnWhale(self, task):
+		#cwhales = len(whales.models.WHALES)
+		#i = int(tf[0] / MAX_FREQ * cwhales) % cwhales
+		#print(i)
+		self.addWhale()
+		task.delayTime = 0.7+(rd.random()*3)
+		return task.again
+
+	def startPlaying(self):
+		self.state = self.S_GAME
+		if self.screen:
+			self.screen.remove()
 			self.screen = None
-		else:
+		self._tspawn = taskMgr.doMethodLater(2, self.spawnWhale, "spawnWhale")
+
+	def act(self, tf):
+		if(self.state == self.S_INTRO):
+			self.startPlaying()
+		elif self.state == self.S_GAME:
 			cwhales = len(whales.models.WHALES)
-			i = int(tf [0] / MAX_FREQ * cwhales) % cwhales
-			print(i)
-			self.addWhale(i)
+			for w in self.whales:
+				i = int(tf[0] / MAX_FREQ * cwhales) % cwhales
+				print(i)
+				if (i == w.i) :
+					w.showLove()
+
 
 	def update(self, task):
 		tf = mic.tell()
@@ -217,6 +239,6 @@ def runWorld():
 	)
 		return "lol"
 	world = Mundo()
-	if DEBUG: taskMgr.popupControls() #schwarts says he has them empty too
+	#lol this appears inside the debug windows anyway if DEBUG: taskMgr.popupControls() #schwarts says he has them empty too
 	world.run()
 	mic.die()
