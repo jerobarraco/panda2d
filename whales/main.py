@@ -24,7 +24,7 @@
 	"ppython".
 
 """
-
+VOLUME = 130
 
 # TODO everything
 # DONE get mic input
@@ -85,7 +85,13 @@ class Mundo(panda2d.world.World):
 
 	def update(self, task):
 		tf = mic.tell()
-		sys.stdout.write("\rThe freq is %f Hz mean %f." % tf)
+		sys.stdout.write("\rThe freq is %f Hz volume is %f." % tf)
+		if tf[1]> VOLUME:
+			if (self.screen):
+				self.screen.remove()
+				self.screen = None
+			else:
+				print ("lol")
 		return task.again
 
 		
@@ -142,14 +148,21 @@ class Mundo(panda2d.world.World):
 		textNodePath.setScale(70)
 		for b in self.bs:
 			b.onMDead(self.m)
-		
+
+	def start(self):
+		pass
+
 	def addSprites(self):
 		self.atlas = panda2d.sprites.Atlas()
-		self.atlas.loadXml("whales/data", fsprites="sscreen.sprites")
+		self.atlas.loadXml("whales/data", fsprites="sps.sprites")
 		self.tilemap = panda2d.tiles.loadTMX("whales/data", "l1.tmx", self.node)
 		self.pd = 1.0/(self.tilemap.ph or 1.0)
 		#print "pixel density", self.pd
 		self.screen = whales.models.Screen(self.atlas, self.node)
+		self.whales = list([
+			whales.models.Whale(self.atlas, self.node)
+			for i in range(10)
+		])
 		return
 		lob = self.tilemap.olayers['pjs']
 		#self.floor_y = -lob.i

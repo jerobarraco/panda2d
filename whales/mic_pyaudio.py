@@ -56,16 +56,20 @@ class Reader(StopThread):
 
 
 	def read(self):
-		#this is extremely dangerous
-		data = self.str.read(CHUNK)
-		# unpack the data and times by the hamming window
-		#indata = np.array(wave.struct.unpack("%dh"%(CHUNK), data))*self.window
-		indata = np.fromstring(data, dtype=np.int16)
-		p = 20*np.log10(np.abs(np.fft.rfft(indata))) #power ?
-		f = np.linspace(0, RATE/2.0, len(p)) #freqs?
-		pmi = p.argmax()
-		pm = p[pmi]
-		return (f[pmi], pm)
+		try:
+			#this is extremely dangerous
+			data = self.str.read(CHUNK)
+			# unpack the data and times by the hamming window
+			#indata = np.array(wave.struct.unpack("%dh"%(CHUNK), data))*self.window
+			indata = np.fromstring(data, dtype=np.int16)
+			p = 20*np.log10(np.abs(np.fft.rfft(indata))) #power ?
+			f = np.linspace(0, RATE/2.0, len(p)) #freqs?
+			pmi = p.argmax()
+			pm = p[pmi]
+			return (f[pmi], pm)
+		except Exception, e:
+			print("error reading audio", e)
+			return (-1, -1)
 
 
 	def read_(self):

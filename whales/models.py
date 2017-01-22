@@ -14,9 +14,20 @@ from pandac.PandaModules import Vec4, Vec3, Vec2
 class Screen(panda2d.sprites.AnimatedSprite):
 	def __init__(self, atlas, node, real=True):
 		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'screen' )
-		self.setSprite("/0")
+		self.setSprite("/screen")
 		self.setX(300)
 		self.setZ(240)
+
+
+WHALES = ('0', '1', '2', '3', '4', '5' )
+class Whale(panda2d.sprites.AnimatedSprite):
+	def __init__(self, atlas, node, real=True):
+		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'whale' )
+		who = rd.choice(WHALES)
+		self.setSprite('/'+who)
+		self.setX(300)
+		self.setZ(240)
+
 
 FOODS = ('rf_0_on', 'rf_1_on', 'rf_2_on', )
 class Food (panda2d.sprites.AnimatedSprite):
