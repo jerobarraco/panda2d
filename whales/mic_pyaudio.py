@@ -66,11 +66,11 @@ class Reader(StopThread):
 			f = np.linspace(0, RATE/2.0, len(p)) #freqs?
 			pmi = len(p) - 1 - p[::-1].argmax() #to get the last big freq (not 0)
 			pm = p[pmi]
-			if(f[pmi]< 0.001): 	return (-1, -1)
+			if(f[pmi]< 0.001) or np.isinf(pm): return (-1, -1)
 			return (f[pmi], pm)
 		except Exception, e:
 			if isinstance(e, KeyboardInterrupt): raise e
-			#print("error reading audio", e)
+			print("error reading audio", e)
 			return (-1, -1)
 
 

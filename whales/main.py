@@ -12,9 +12,13 @@
 	Thanks to:
 		ThomasEgi @ irc.freenode.net/#panda3d
 		StackOverflow :)
-		Tileset : http://manuxd789.deviantart.com/art/Free-use-Underwater-Tiles-RPG-Maker-XP-477146613
+		Tileset :
+			http://manuxd789.deviantart.com/art/Free-use-Underwater-Tiles-RPG-Maker-XP-477146613
 		Sounds:
 			http://soundbible.com/tags-whale.html
+		Icons :
+			Icon made by http://www.flaticon.com/authors/prosymbols from www.flaticon.com
+			http://www.flaticon.com/authors/flat-icons
 
 	Yes this is full of dirty hacks :)
 
@@ -37,9 +41,11 @@ from whales.config import VOLUME, MAX_FREQ
 # DONE get fft level or something
 # TODO sprites
 # TODO sound for whales (wanna do this ryo?)
+# TODO whale die
 # DONE do something with the fft
 # TODO do the world
 # TODO do the scenes
+
 #requires pyaudio
 #requires numpy
 #can require alsaaudio
@@ -126,15 +132,16 @@ class Mundo(panda2d.world.World):
 			self.startPlaying()
 		elif self.state == self.S_GAME:
 			cwhales = len(whales.models.WHALES)
+			i = int(tf[0] / MAX_FREQ * cwhales) % cwhales
+			v = tf[1]/VOLUME
 			for w in self.whales:
-				i = int(tf[0] / MAX_FREQ * cwhales) % cwhales
+				w.hear(i, v)
 				#sys.stdout.write(str(i))#print(i)
-				if (i == w.i) :
-					w.showLove()
 
 
 	def update(self, task):
 		tf = mic.tell()
+		self.mic.show(tf)
 		#sys.stdout.write("\rFreq= %f Hz Vol= %f." % tf)
 		#sys.stdout.write(".")
 		if tf[1] > VOLUME:
@@ -207,6 +214,7 @@ class Mundo(panda2d.world.World):
 		#print "pixel density", self.pd
 		self.screen = whales.models.Screen(self.atlas, self.node)
 		self.screen.setY(self.floor_y+1)
+		self.mic = whales.models.Mic(self.atlas, self.node, self)
 		#self.screen.debug("Hello, please configure the volume, then do like a whale")
 		return
 		lob = self.tilemap.olayers['pjs']

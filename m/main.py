@@ -129,4 +129,4 @@ class Mundo(panda2d.world.World):
 
 def runWorld():
 	world = Mundo()
-	run()
+	world.run()

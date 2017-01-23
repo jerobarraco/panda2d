@@ -248,8 +248,12 @@ class Atlas():
 			dd, parent = dirs.pop(0)
 			name = dd.name
 			#print (dd, parent, name)
+			#path = parent+name+'/'
 			#path = parent+'/'+name
-			path = parent+name
+			path = parent + name # TODO this sucks but thats how dfEditor works
+			#path = parent
+			#if parent: path += '/'
+			#path += name
 			if hasattr(dd, 'dir'):#if it has more pseudo directories (categories) in it, it add them to the "queue"
 				#print (dd)
 				dirs.extend(

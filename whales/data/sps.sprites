@@ -3,9 +3,11 @@
 <img name="sps.png" w="2048" h="1024">
   <definitions>
     <dir name="/">
-      <dir name="ic">
-        <spr name="heart_on" x="1712" y="11" w="15" h="14"/>
-        <spr name="heart_off" x="1712" y="29" w="19" h="14"/>
+      <dir name="ic/">
+        <spr name="heart_on" x="1637" y="20" w="15" h="14"/>
+        <spr name="heart_off" x="1635" y="37" w="19" h="14"/>
+        <spr name="mic2" x="1798" y="0" w="128" h="128"/>
+        <spr name="mic" x="1666" y="0" w="128" h="128"/>
       </dir>
       <spr name="0" x="1" y="1" w="398" h="163"/>
       <spr name="1" x="400" y="1" w="571" h="233"/>

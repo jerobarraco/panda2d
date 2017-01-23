@@ -8,8 +8,31 @@ import panda2d.sprites
 from pandac.PandaModules import NodePath
 from direct.interval.LerpInterval import LerpColorInterval, LerpHprScaleInterval, LerpPosHprScaleInterval, LerpPosInterval
 from direct.interval.IntervalGlobal import Sequence
-
 from pandac.PandaModules import Vec4, Vec3, Vec2
+
+import whales.config
+
+class Mic(panda2d.sprites.AnimatedSprite):
+	bs = 0.5
+	def __init__(self, atlas, node, w):
+		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'screen')
+		self.setSprite("/ic/mic")
+		self.w = w
+		t,b, w, h = self.rect
+		self.setPos(
+			self.w.tilemap.pw-w/4, self.getY(), 0+h/4.0
+		)
+		self.setScale(self.bs)
+
+	def show(self, tf):
+		scale = max(self.bs*tf[1]/whales.config.VOLUME/1.5, self.bs/4.0)
+		self.setScale(scale)
+		v = tf[0]/whales.config.MAX_FREQ
+		ec = (v,v,v,1)#(r, g, b, 1.0)
+		#print(scale,ec)
+		#dt = globalClock.getDt()
+		self.setColorScale(ec)
+		#self.colorScaleInterval(dt, ec, self.getColorScale()).start()
 
 class Screen(panda2d.sprites.AnimatedSprite):
 	def __init__(self, atlas, node, real=True):
@@ -18,15 +41,28 @@ class Screen(panda2d.sprites.AnimatedSprite):
 		self.setX(300)
 		self.setZ(240)
 
+class Heart(panda2d.sprites.AnimatedSprite):
+	OFF = "/ic/heart_off"
+	ON = "/ic/heart_on"
+	def __init__(self, atlas, node, on=True):
+		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node )
+		self.turn(on)
+
+	def turn(self, on=True):
+		icon = on and self.ON or self.OFF
+		self.setSprite(icon)
+
 
 WHALES = ('0', '1', '2', '3', '4', '5' )
-S_WHALE = ('0', '1', '2', '3', '4', '5' )
+S_WHALE = ('0.mp3', '1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3' ) #TODO this shoudld be the sound files
 class Whale(panda2d.sprites.AnimatedSprite):
 	SWIMMING = 0
 	DEAD = 100
 	state = 0
 	sp = 15
 	love = 0
+	heart = None
+	heart_bs = 3
 	def __init__(self, atlas, node, world, wi = -11):
 		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'whale' )
 		if wi < 0 :
@@ -43,11 +79,27 @@ class Whale(panda2d.sprites.AnimatedSprite):
 		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'bbeat')
 		self.startStroll()
 
-	def showLove(self):
-		t = "i like that"
+	def hear(self, i, v):
+		on = i == self.i
+		if on :
+			self.showLove(v)
+
+		else:
+			self.showLove(-1)
+		self.heart.turn(on)
+
+	def showLove(self, v):
+		self.love += v/100.0
+		t = "i like that "+str((self.i, self.love))
 		self.debug(t)
-		self.love += 1
-		print(t)
+		if not self.heart:
+			self.heart = Heart(self.atlas, self)
+			self.heart.setScale(self.heart_bs)
+			self.heart.setPos(100, -1, 100)
+			print(t)
+		else:
+			self.heart.setScale(self.heart_bs+self.love)
+
 		#TODO ryo if you want you can do this, when this method gets called add a heart icon,
 		# you can use the same code and assets from "m"
 
@@ -109,7 +161,7 @@ class Whale(panda2d.sprites.AnimatedSprite):
 			LerpColorInterval(self, 2, (0, 0, 0, 1))
 		).start()
 
-
+### code here and below is just from another project, here for reference
 FOODS = ('rf_0_on', 'rf_1_on', 'rf_2_on', )
 class Food (panda2d.sprites.AnimatedSprite):
 	def __init__(self, atlas, node, real=True):
@@ -249,11 +301,7 @@ class M(panda2d.sprites.AnimatedSprite):#NodePath):#panda2d.sprites.AnimatedSpri
 		self.DOWN = down
 		if down: self.setTask()
 
-class Heart(panda2d.sprites.AnimatedSprite):
-	def __init__(self, atlas, node, broken=False):
-		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node )
-		self.B = self.atlas.animIndex(broken and "h2" or "h1")
-		self.play(self.B)
+
 	
 class B(panda2d.sprites.AnimatedSprite):#NodePath):
 	sp = 15
