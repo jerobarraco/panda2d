@@ -217,7 +217,7 @@
    <tile gid="685"/>
    <tile gid="686"/>
    <tile gid="687"/>
-   <tile gid="897"/>
+   <tile gid="685"/>
    <tile gid="685"/>
    <tile gid="685"/>
    <tile gid="686"/>
@@ -439,7 +439,7 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="336"/>
+   <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>

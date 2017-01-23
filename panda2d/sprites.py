@@ -57,11 +57,12 @@ class SpriteDef():
 		#self.offset = Vec2(*map(float, lines.pop(0).split(":")[1].split(",")))
 		#self.index = int(lines.pop(0).split(":")[1])
 
+#TODO dfE goes crazy with subfolders, fix it
 class Frame():
 	def __init__(self, idn, delay, sprites):
 		self.idx, self.delay, self.sprs = idn, delay, sprites
 		s = self.sprs[0]
-		self.name = s[0]
+		self.name = s[0] #TODO have many sprites ?
 		self.offset = Vec2(s[1], s[2])
 
 class Animation():
@@ -103,14 +104,13 @@ class AnimatedSprite(NodePath):
 		self.reparentTo(parent)
 		self.setTransparency(True)
 
-	def debug(self, text): # this is the best thing that i could have done
+	def debug(self, text, scale=13): # this is the best thing that i could have done
 		if not hasattr(self, "_tn"):
-			text = TextNode("debug textnode")
-			text.setText(str(text))
-			text.setTextColor(1.0, 0.2, 0.2, 1.0)
-			self._tn = self.attachNewNode(text)
-			self._tn.setScale(13)
+			textn = TextNode("debug textnode")
+			textn.setTextColor(1.0, 0.2, 0.2, 1.0)
+			self._tn = self.attachNewNode(textn)
 			self._tn.setPos(-20, -1, -20)
+		self._tn.setScale(scale)
 		self._tn.node().setText(str(text))
 
 	def setCollide(self, owner=None, show=False):
@@ -200,7 +200,11 @@ class Atlas():
 	texture = None
 	anims = tuple()
 	sprites = {}
-	
+
+	def __init__(self, dir="", fanim=None, fsprites=None ):
+		if fanim or fsprites:
+			self.loadXml(dir, fanim, fsprites)
+
 	def animIndex(self, name):
 		for i, a in enumerate(self.anims):
 			if a.name == name:
@@ -297,8 +301,8 @@ class Atlas():
 		f = open(dir+'/'+filename, "r")
 		text = f.readline().strip()
 		self.texture = loader.loadTexture(dir+'/'+text)
-		self.texture.setMagfilter(Texture.FTLinearMipmapLinear)
-		self.texture.setMinfilter(Texture.FTLinearMipmapLinear)
+		self.texture.setMagfilter(panda2d.TXFILTER)
+		self.texture.setMinfilter(panda2d.TXFILTER)
 		self.sprites = {}
 		format = f.readline().strip()
 		filter = f.readline().strip()
