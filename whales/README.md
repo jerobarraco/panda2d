@@ -1,8 +1,12 @@
 License is GPLv3 for the code and Tomas' images (if he wants to)
 and the same license for the images used here that are from other places
 
-Please edit config.py
-
+Running:
+	Please edit config.py
+	Open a terminal
+	go to the run_whales.py directory
+	excecute: python run_whales.py
+	
 How to play:
 - Use your mic (and configure it (pavucontrol))
 - Talk, sing or anything to the whales, each one likes its own frequency though
@@ -19,7 +23,8 @@ Being a whale is not easy, please help protecting them http://www.internationalw
 		Tomas Gutierrez -> Graphics
 		Jeronimo Barraco Marmol -> coding
 		Nicholas Oliveira -> coding and awesomeness
-
+		Code available here -> https://bitbucket.org/jerobarraco/panda2d
+		
 	Thanks to:
 		@ irc.freenode.net/#panda3d
 			ThomasEgi
@@ -37,7 +42,10 @@ Being a whale is not easy, please help protecting them http://www.internationalw
 		Icons :
 			Icon made by http://www.flaticon.com/authors/prosymbols from www.flaticon.com
 			http://www.flaticon.com/authors/flat-icons
-
+		
+		Made completely with free soft
+			- ubuntu, kde, pycharm, audacity, gimp, darkfunction editor, tiled, kate, and many others
+			
 	Yes this is full of dirty hacks :)
 
 	requires pyaudio
