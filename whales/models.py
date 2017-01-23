@@ -15,23 +15,24 @@ import whales.config
 
 class Ship(panda2d.sprites.AnimatedSprite):
 	hate = 0
-	MAX_HATE = 100
+	MAX_HATE = 2500
 	def __init__(self, atlas, node, w):
 		panda2d.sprites.AnimatedSprite.__init__(self, atlas, node, 'ship')
 		self.w = w
 		self.play(self.atlas.animIndex("Ship"))
 		self.setPos(self.w.tilemap.pw/2.0, 0, -500)#self.w.tilemap.ph-200)
 		self.setScale(3)
-		self.setY(self.w.floor_y+1)
+		self.setY(self.w.floor_y-2.5)
 
 	def go(self):
 		LerpPosInterval(self, 8, self.getPos()+Vec3(0, 0, 2000), self.getPos()).start()
 
 	def hear(self, f, v):
-		print(f, v)
+		v = v/whales.config.VOLUME
 		self.hate += v
 		if (self.hate > self.MAX_HATE):
 			self.w.lose()
+		if self.hate <0: self.hate = 0
 
 	def bomb(self):
 		pass #no time for this, create a class for bomb, create an animation of a bomb, set the animation,
@@ -106,22 +107,25 @@ class Whale(panda2d.sprites.AnimatedSprite):
 		self._tmove = None
 		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'bbeat')
 		self.startStroll()
+		self.setColor(0,0,0,0)
+		LerpColorInterval(self, 2, (1, 1, 1, 1)).start()
 
 	def hear(self, i, v):
 		on = i == self.i
 		if on :
 			self.showLove(v)
 		else:
-			self.showLove(-1)
+			self.showLove(-0.1)
 
 	def showLove(self, v):
-		self.love = max(self.love +(v/100.0), self.MAX_LOVE)
+		self.love = self.love +(v/100.0)
+		if self.love > self.MAX_LOVE: self.love = self.MAX_LOVE
 		t = str((self.i, v, self.love))
 		if not self.heart:
 			self.heart = Heart(self.atlas, self)
 			self.heart.setPos(100, -1, 100)
 		self.heart.turn(v>0)
-		self.debug(t, 50)
+		#self.debug(t, 50)
 		self.heart.setScale(self.heart_bs*(0.25+self.love))
 		#cs = 0.5 + v
 		#self.heart.setColorScale(cs,cs,cs,1)
@@ -184,6 +188,7 @@ class Whale(panda2d.sprites.AnimatedSprite):
 			LerpPosHprScaleInterval(self, 0.5, epos, (0,0,90), self.getScale()*1.5, blendType="easeIn"),
 			LerpPosHprScaleInterval(self, 0.5, ipos, (0,0,180), self.getScale(), blendType="easeOut"),
 			LerpColorInterval(self, 2, (0, 0, 0, 1)),
-			Wait(1.0),
+			Wait(3.0),
+			LerpColorInterval(self, 2, (0, 0, 0, 0)),
 			Func(self.remove)
 		).start()

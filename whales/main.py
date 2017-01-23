@@ -1,46 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #Copyright 2017 GPLv3
-"""
-	Example game made in <1 day for the global game jam 2017.
-	It is rushed, hacky and not academic.
-	Credits goes to :
-		Tomas Gutierrez -> Graphics
-		Jeronimo Barraco Marmol -> coding
-		Nicholas Oliveira -> coding and awesomeness
 
-	Thanks to:
-		@ irc.freenode.net/#panda3d
-			ThomasEgi
-			rdb
-			Schwarzbaer
-
-		StackOverflow :)
-
-		Tileset :
-			http://manuxd789.deviantart.com/art/Free-use-Underwater-Tiles-RPG-Maker-XP-477146613
-		Sounds:
-			http://soundbible.com/tags-whale.html
-		Ship:
-			http://opengameart.org/content/ships-with-ripple-effect
-		Icons :
-			Icon made by http://www.flaticon.com/authors/prosymbols from www.flaticon.com
-			http://www.flaticon.com/authors/flat-icons
-
-	Yes this is full of dirty hacks :)
-
-	requires pyaudio
-	requires numpy
-
-	install them with pip install pyaudio and pip install numpy
-
-	to use pip with panda (on windows) get the "get_pip.py" and run it with
-	"ppython".
-
-	Being a whale is not easy, please help protecting them http://www.internationalwhaleprotection.org
-
-	After "Hatoful Boyfriend" heres comes the best animal love simulator ever
-"""
 from whales.config import VOLUME, MAX_FREQ
 
 
@@ -72,7 +33,7 @@ size = width, height = 640, 480
 
 import panda2d
 #Before importing the world we need to set up stuff. 
-panda2d.setUp(size[0], size[1], "Whales", False, (100, 100), txfilter=2, ani=0, keep_ar=True, wantTK=DEBUG)
+panda2d.setUp(size[0], size[1], "Whales", False, (100, 100), txfilter=4, ani=0, keep_ar=True, wantTK=DEBUG)
 
 import panda2d.world
 import panda2d.sprites
@@ -83,6 +44,7 @@ import whales.models
 import mic
 
 from direct.showbase.ShowBase import ShowBase
+from direct.interval.LerpInterval import LerpColorInterval
 
 class Mundo(panda2d.world.World):
 	floor_y = -1
@@ -90,6 +52,7 @@ class Mundo(panda2d.world.World):
 	S_GAME = 1
 	S_END = 2
 	state = 0
+	tilenode = None
 	def __init__(self):
 		panda2d.world.World.__init__(self, size[0], size[1], bgColor=(100, 0, 100), debug=DEBUG)
 		self.addSprites()
@@ -116,6 +79,7 @@ class Mundo(panda2d.world.World):
 		frameTime = globalClock.getFrameTime()
 		if frameTime - self.last_whale < 2:
 			return
+		if len(self.whales)> 20: return
 		self.last_whale = frameTime
 		self.whales.append(whales.models.Whale(self.atlas, self.node, self, wi))
 
@@ -140,11 +104,16 @@ class Mundo(panda2d.world.World):
 		self._tspawn = taskMgr.doMethodLater(2, self.spawnWhale, "spawnWhale")
 
 	def lose(self):
+		if self.state == self.S_END : return
+		if self._tspawn: taskMgr.remove(self._tspawn)
+		self._tspawn = None
 		self.state = self.S_END
 		self.ship.show()
 		self.ship.go()
-		for w in self.whales[:]
-
+		for w in self.whales[:]:
+			w.die()
+		LerpColorInterval(self.tilenode, 2, (1, 0, 0, 1)).start()
+		
 	def act(self, tf):
 		if(self.state == self.S_INTRO):
 			self.startPlaying()
@@ -156,7 +125,6 @@ class Mundo(panda2d.world.World):
 				w.hear(i, v)
 			self.ship.hear(i, tf[1])
 
-
 	def update(self, task):
 		tf = mic.tell()
 		self.mic.show(tf)
@@ -164,6 +132,9 @@ class Mundo(panda2d.world.World):
 		#sys.stdout.write(".")
 		if tf[1] > VOLUME:
 			self.act(tf)
+		else:
+			if self.state == self.S_GAME:
+				self.ship.hear(0, -VOLUME/100.0)
 
 		return task.again
 
@@ -171,13 +142,14 @@ class Mundo(panda2d.world.World):
 		self.atlas = panda2d.sprites.Atlas()
 		self.atlas.loadXml("whales/data", fsprites="sps.sprites")
 		self.shatlas = panda2d.sprites.Atlas("whales/data", fanim="aship.anim")
-		self.tilemap = panda2d.tiles.loadTMX("whales/data", "l1.tmx", self.node)
+		self.tilenode = self.node.attachNewNode("tilemap")
+		self.tilemap = panda2d.tiles.loadTMX("whales/data", "l1.tmx", self.tilenode)
 		self.pd = 1.0/(self.tilemap.ph or 1.0)
 		self.floor_y = -self.tilemap.layers['ipj'].i
 
 		#print "pixel density", self.pd
 		self.screen = whales.models.Screen(self.atlas, self.node)
-		self.screen.setY(self.floor_y+1)
+		self.screen.setY(self.floor_y-1)
 		self.mic = whales.models.Mic(self.atlas, self.node, self)
 		self.ship = whales.models.Ship(self.shatlas, self.node, self)
 		self.ship.hide()
