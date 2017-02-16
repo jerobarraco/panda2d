@@ -41,7 +41,7 @@ class M(panda2d.sprites.AnimatedSprite):#NodePath):#panda2d.sprites.AnimatedSpri
 		self.STANDING_R = self.atlas.animIndex("stand_r")
 		self.WALKING_L = self.atlas.animIndex("walk_l")
 		self.WALKING_R = self.atlas.animIndex("walk_r")
-		self.setState(self.STANDING_R)
+		self.setMyState(self.STANDING_R)
 		self.setPos(30, 0, 60)
 		self.setTask()
 		self._tbeat = taskMgr.doMethodLater(1, self.beat, 'mbeat')
@@ -76,7 +76,7 @@ class M(panda2d.sprites.AnimatedSprite):#NodePath):#panda2d.sprites.AnimatedSpri
 		print ("game over?")
 		self.w.died()
 		self.UP = self.DOWN = self.LEFT = self.RIGHT = False
-		self.setState(self.atlas.animIndex('M_dead'))
+		self.setMyState(self.atlas.animIndex('M_dead'))
 		#self.play(self.atlas.animIndex('M_dead'))
 		ipos = self.getPos()
 		epos = ipos+Vec3(0, 0, 20)
@@ -100,7 +100,7 @@ class M(panda2d.sprites.AnimatedSprite):#NodePath):#panda2d.sprites.AnimatedSpri
 			self.card.colorScaleInterval(task.delayTime, ec).start()
 			return task.again
 		
-	def setState(self, nstate):
+	def setMyState(self, nstate):### WARNING!! "setState" overrides a base method  panda3d.core.NodePath.NodePath
 		if self.state == nstate: return
 		self.play(nstate)
 
@@ -122,10 +122,10 @@ class M(panda2d.sprites.AnimatedSprite):#NodePath):#panda2d.sprites.AnimatedSpri
 		self.setPos(self.getX()+dx*dt, yy, y)
 		if (dx == dy == 0):
 			self.m = None
-			self.setState(self.to_left and self.STANDING_L or self.STANDING_R)
+			self.setMyState(self.to_left and self.STANDING_L or self.STANDING_R)
 			return task.done
 		else:
-			self.setState(self.to_left and self.WALKING_L or self.WALKING_R)
+			self.setMyState(self.to_left and self.WALKING_L or self.WALKING_R)
 		return task.cont
 	
 	def up(self, down):
