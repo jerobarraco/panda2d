@@ -147,10 +147,18 @@ class AnimatedSprite(NodePath):
 		#the screen origin is bottom-left but also +Y
 		
 	def setSprite(self, spriteName):
+		"""Sets a static sprite by its name
+		@spriteName string with the name of the sprite
+		"""
 		fr = self.atlas.frameForSp(spriteName)
 		self.setFrame(fr)
 		
 	def play(self, i):
+		"""Starts playing an animation
+		@i is the index of the animation
+		current animation is stored in @self.state
+		animation index can be obtained with atlas.animIndex("anim_name")
+		"""
 		self.anim = self.atlas.anims[i]
 		self.state = i
 		self.current = 0
@@ -160,11 +168,13 @@ class AnimatedSprite(NodePath):
 		self.task = taskMgr.doMethodLater(0, self.animate, 'animation')
 
 	def stop(self):
+		"""Stops an animation"""
 		if self.task:
 			taskMgr.remove(self.task)
 			self.task = None
 
 	def remove(self):
+		"""Removes an animated sprite from the tree (it will get freed if there are no more references)"""
 		self.stop()
 		if self.cnodep:
 			self.cnodep.node().setPythonTag("owner", None)
